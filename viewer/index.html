@@ -355,13 +355,26 @@ git push</pre></li>
 
 <script>
 const AVATAR_COLORS = ['#5B9BD5','#D4793A','#2D8F5E','#8B5CF6','#EC4899','#0EA5E9','#F59E0B','#6366F1'];
-const MEMBER_NAMES = {
-  'bmahsang': '김상현',
-};
+const MEMBER_NAMES = {};
 
 let allReports = [];
 let selectedAuthor = null;
 let selectedMonth = null;
+
+function extractMemberNames(reports) {
+  reports.forEach(r => {
+    if (MEMBER_NAMES[r.author]) return;
+    const m = r.content.match(/\*\*작성자[:：]\*\*\s*(.+)/);
+    if (!m) return;
+    const line = m[1].trim();
+    const paren = line.match(/\(([^)]+)\)/);
+    if (paren) {
+      MEMBER_NAMES[r.author] = paren[1];
+    } else if (line !== r.author) {
+      MEMBER_NAMES[r.author] = line;
+    }
+  });
+}
 
 function isoWeekToMonth(year, weekNum) {
   const jan4 = new Date(year, 0, 4);
@@ -391,6 +404,7 @@ async function init() {
     }
   });
 
+  extractMemberNames(allReports);
   buildMemberList();
 }
 
