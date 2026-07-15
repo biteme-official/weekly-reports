@@ -25,6 +25,7 @@ weekly-reports/
 ## 파일 작성 규칙
 
 ### 파일명
+- **실명**으로 파일 생성 (GitHub ID 사용 금지)
 - 주간: `reports/{연도}/W{주차}/{이름}.md` — 예: `reports/2026/W29/홍길동.md`
 - 월간: `reports/{연도}/M{월}/{이름}.md` — 예: `reports/2026/M07/홍길동.md`
 

@@ -11,7 +11,6 @@
     --surface: #FFFFFF;
     --sidebar-bg: #1C1F26;
     --sidebar-text: #B0B3BC;
-    --sidebar-active: #FFFFFF;
     --sidebar-hover: #272A33;
     --sidebar-accent: #5B9BD5;
     --text: #1A1C21;
@@ -24,49 +23,34 @@
     --shadow: 0 1px 3px rgba(0,0,0,.04);
     --radius: 10px;
   }
-
   * { margin: 0; padding: 0; box-sizing: border-box; }
-
   body {
     font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", "Apple SD Gothic Neo", "Malgun Gothic", sans-serif;
-    background: var(--bg);
-    color: var(--text);
-    display: flex;
-    min-height: 100vh;
+    background: var(--bg); color: var(--text);
+    display: flex; min-height: 100vh;
     -webkit-font-smoothing: antialiased;
   }
 
   /* ── Sidebar ── */
   .sidebar {
-    width: 260px;
-    min-height: 100vh;
-    background: var(--sidebar-bg);
-    color: var(--sidebar-text);
-    display: flex;
-    flex-direction: column;
-    position: fixed;
-    left: 0; top: 0; bottom: 0;
-    z-index: 10;
-    overflow-y: auto;
+    width: 260px; min-height: 100vh;
+    background: var(--sidebar-bg); color: var(--sidebar-text);
+    display: flex; flex-direction: column;
+    position: fixed; left: 0; top: 0; bottom: 0;
+    z-index: 10; overflow-y: auto;
   }
-  .sidebar-header {
-    padding: 22px 20px 14px;
-    border-bottom: 1px solid rgba(255,255,255,.07);
-  }
+  .sidebar-header { padding: 22px 20px 14px; border-bottom: 1px solid rgba(255,255,255,.07); }
   .sidebar-header h1 { font-size: 15px; font-weight: 700; color: #fff; }
   .sidebar-header p { font-size: 11px; color: var(--sidebar-text); margin-top: 3px; }
-
   .sidebar-label {
     font-size: 10px; font-weight: 700; letter-spacing: .08em; text-transform: uppercase;
     color: rgba(255,255,255,.28); padding: 16px 20px 6px;
   }
-
   .member-item {
     display: flex; align-items: center; gap: 10px;
     padding: 9px 16px; margin: 2px 8px; border-radius: 7px;
     cursor: pointer; border: none; background: none;
-    width: calc(100% - 16px); text-align: left;
-    transition: all .12s;
+    width: calc(100% - 16px); text-align: left; transition: all .12s;
   }
   .member-item:hover { background: var(--sidebar-hover); }
   .member-item.active { background: rgba(91,155,213,.2); }
@@ -86,8 +70,6 @@
     color: var(--sidebar-text); flex-shrink: 0;
   }
   .member-item.active .member-count { background: var(--sidebar-accent); color: #fff; }
-
-  /* Guide button */
   .guide-btn {
     display: flex; align-items: center; gap: 6px;
     width: calc(100% - 24px); margin: 0 12px;
@@ -97,7 +79,6 @@
     cursor: pointer; transition: all .12s;
   }
   .guide-btn:hover { background: var(--sidebar-hover); color: #fff; }
-  .guide-btn svg { flex-shrink: 0; }
 
   /* ── Main ── */
   .main { margin-left: 260px; flex: 1; min-height: 100vh; }
@@ -105,73 +86,86 @@
   /* Filter bar */
   .filter-bar {
     display: flex; align-items: center; gap: 10px; flex-wrap: wrap;
-    padding: 16px 36px;
+    padding: 14px 36px;
     background: var(--surface);
     border-bottom: 1px solid var(--border);
     position: sticky; top: 0; z-index: 5;
   }
-  .filter-bar .person-label {
-    font-size: 15px; font-weight: 700; margin-right: 8px;
-    letter-spacing: -.01em;
+  .filter-bar .person-label { font-size: 15px; font-weight: 700; margin-right: 4px; }
+  .filter-bar .sep { width: 1px; height: 20px; background: var(--border); margin: 0 4px; }
+
+  /* Type tabs */
+  .type-tabs {
+    display: flex; gap: 2px;
+    background: var(--bg); border-radius: 7px; padding: 2px;
   }
-  .filter-bar .sep {
-    width: 1px; height: 20px; background: var(--border); margin: 0 4px;
+  .type-tab {
+    padding: 5px 14px; border-radius: 5px; border: none;
+    font-size: 12px; font-weight: 600; cursor: pointer;
+    background: transparent; color: var(--text-muted);
+    font-family: inherit; transition: all .12s;
   }
-  .dropdown {
-    position: relative; display: inline-block;
-  }
+  .type-tab.active { background: var(--surface); color: var(--text); box-shadow: 0 1px 3px rgba(0,0,0,.08); }
+  .type-tab:hover:not(.active) { color: var(--text-secondary); }
+
+  /* Dropdown */
+  .dropdown { position: relative; display: inline-block; }
   .dropdown select {
-    appearance: none;
-    background: var(--bg);
-    border: 1px solid var(--border);
-    border-radius: 7px;
-    padding: 7px 32px 7px 12px;
-    font-size: 13px; font-weight: 600;
-    color: var(--text);
-    cursor: pointer;
-    font-family: inherit;
-    min-width: 120px;
+    appearance: none; background: var(--bg);
+    border: 1px solid var(--border); border-radius: 7px;
+    padding: 6px 30px 6px 10px;
+    font-size: 13px; font-weight: 600; color: var(--text);
+    cursor: pointer; font-family: inherit; min-width: 110px;
   }
   .dropdown select:focus { outline: none; border-color: var(--accent); }
   .dropdown::after {
-    content: "";
-    position: absolute; right: 11px; top: 50%;
+    content: ""; position: absolute; right: 10px; top: 50%;
     transform: translateY(-50%);
-    border-left: 4px solid transparent;
-    border-right: 4px solid transparent;
-    border-top: 5px solid var(--text-muted);
-    pointer-events: none;
+    border-left: 4px solid transparent; border-right: 4px solid transparent;
+    border-top: 5px solid var(--text-muted); pointer-events: none;
   }
   .dropdown label {
     font-size: 11px; font-weight: 600; color: var(--text-muted);
-    letter-spacing: .03em; margin-right: 6px;
+    letter-spacing: .03em; margin-right: 5px;
+  }
+
+  /* Stats bar */
+  .stats-bar {
+    display: flex; gap: 16px; flex-wrap: wrap;
+    padding: 14px 36px; border-bottom: 1px solid var(--border);
+    background: var(--surface);
+  }
+  .stat-item {
+    display: flex; align-items: center; gap: 6px;
+    font-size: 12px; color: var(--text-muted);
+  }
+  .stat-value { font-weight: 700; font-size: 14px; color: var(--text); }
+  .stat-value.blue { color: var(--accent); }
+  .stat-value.orange { color: var(--warm); }
+  .stat-value.green { color: var(--green); }
+  .stat-dot {
+    width: 6px; height: 6px; border-radius: 50%;
   }
 
   /* Content */
   .content-body { padding: 28px 36px 60px; }
-
   .report-card {
-    background: var(--surface);
-    border: 1px solid var(--border);
-    border-radius: var(--radius);
-    padding: 28px 32px;
-    margin-bottom: 16px;
-    box-shadow: var(--shadow);
+    background: var(--surface); border: 1px solid var(--border);
+    border-radius: var(--radius); padding: 28px 32px;
+    margin-bottom: 16px; box-shadow: var(--shadow);
   }
   .report-card .report-meta {
     display: flex; align-items: center; gap: 8px;
     margin-bottom: 16px; padding-bottom: 14px;
     border-bottom: 1px solid var(--border);
   }
-  .report-card .period-badge {
+  .period-badge {
     font-size: 11px; font-weight: 700; letter-spacing: .03em;
     padding: 3px 9px; border-radius: 5px;
   }
   .period-badge.weekly { background: #2563A014; color: var(--accent); }
   .period-badge.monthly { background: #D4793A14; color: var(--warm); }
-  .report-card .report-period {
-    font-size: 14px; font-weight: 600; color: var(--text-secondary);
-  }
+  .report-period { font-size: 14px; font-weight: 600; color: var(--text-secondary); }
 
   /* Markdown */
   .md-content h1 { font-size: 20px; font-weight: 700; margin: 20px 0 10px; }
@@ -199,9 +193,7 @@
   .md-content code { background: var(--bg); padding: 2px 6px; border-radius: 4px; font-size: 13px; }
 
   /* Empty */
-  .empty-state {
-    text-align: center; padding: 80px 40px; color: var(--text-muted);
-  }
+  .empty-state { text-align: center; padding: 80px 40px; color: var(--text-muted); }
   .empty-state .icon { font-size: 44px; margin-bottom: 14px; opacity: .35; }
   .empty-state h3 { font-size: 17px; font-weight: 600; color: var(--text-secondary); margin-bottom: 6px; }
   .empty-state p { font-size: 14px; }
@@ -269,6 +261,7 @@
     .main { margin-left: 0; }
     .mobile-toggle { display: flex; align-items: center; justify-content: center; }
     .filter-bar { padding: 14px 16px; padding-top: 52px; }
+    .stats-bar { padding: 10px 16px; }
     .content-body { padding: 20px 16px 60px; }
   }
 </style>
@@ -297,15 +290,18 @@
   <div class="filter-bar" id="filter-bar" style="display:none">
     <span class="person-label" id="filter-person"></span>
     <span class="sep"></span>
-    <span class="dropdown">
-      <label>월</label>
-      <select id="month-select" onchange="onMonthChange()"></select>
-    </span>
+    <div class="type-tabs" id="type-tabs">
+      <button class="type-tab active" onclick="setType('all')">전체</button>
+      <button class="type-tab" onclick="setType('weekly')">주간</button>
+      <button class="type-tab" onclick="setType('monthly')">월간</button>
+    </div>
+    <span class="sep"></span>
     <span class="dropdown">
       <label>기간</label>
-      <select id="period-select" onchange="onPeriodChange()"></select>
+      <select id="period-select" onchange="renderContent()"></select>
     </span>
   </div>
+  <div id="stats-area"></div>
   <div id="content-area">
     <div class="empty-state">
       <div class="icon">&#128203;</div>
@@ -338,12 +334,13 @@ git push</pre></li>
       </ol>
       <h3>파일 위치 규칙</h3>
       <table class="cmd-table">
-        <tr><td>reports/2026/W28/이름.md</td><td>주간 보고서 (ISO 주차)</td></tr>
-        <tr><td>reports/2026/M07/이름.md</td><td>월간 보고서</td></tr>
+        <tr><td>reports/2026/W28/홍길동.md</td><td>주간 보고서 (실명, ISO 주차)</td></tr>
+        <tr><td>reports/2026/M07/홍길동.md</td><td>월간 보고서 (실명)</td></tr>
         <tr><td>reports/2026/W28/SUMMARY.md</td><td>관리자 취합본</td></tr>
       </table>
+      <p style="margin-top:6px">파일명은 반드시 <strong>실명</strong>으로 생성합니다 (GitHub ID 사용 금지).</p>
       <h3>보고서 확인 (관리자)</h3>
-      <p>이 뷰어에서 팀원 선택 → 월/기간 드롭다운으로 확인합니다.</p>
+      <p>이 뷰어에서 팀원 선택 → 전체/주간/월간 탭 + 기간 드롭다운으로 확인합니다.</p>
       <h3>취합본 생성 (관리자)</h3>
       <p>레포 폴더에서 Claude Code 실행 후:</p>
       <pre>취합본 생성해줘  # 또는 SUMMARY 만들어줘</pre>
@@ -359,7 +356,7 @@ const MEMBER_NAMES = {};
 
 let allReports = [];
 let selectedAuthor = null;
-let selectedMonth = null;
+let selectedType = 'all';
 
 function extractMemberNames(reports) {
   reports.forEach(r => {
@@ -368,12 +365,25 @@ function extractMemberNames(reports) {
     if (!m) return;
     const line = m[1].trim();
     const paren = line.match(/\(([^)]+)\)/);
-    if (paren) {
+    if (paren && paren[1] !== r.author) {
       MEMBER_NAMES[r.author] = paren[1];
-    } else if (line !== r.author) {
+    } else if (!paren && line !== r.author) {
       MEMBER_NAMES[r.author] = line;
     }
   });
+}
+
+function extractStats(reports) {
+  let totalCommits = 0, totalProjects = 0, totalHarnesses = 0;
+  reports.forEach(r => {
+    const cm = r.content.match(/총\s*커밋[^\d]*?(\d+)/);
+    if (cm) totalCommits += parseInt(cm[1]);
+    const pm = r.content.match(/활성\s*프로젝트[^\d]*?(\d+)/);
+    if (pm) totalProjects = Math.max(totalProjects, parseInt(pm[1]));
+    const hm = r.content.match(/하네스\s*운영[^\d]*?(\d+)/);
+    if (hm) totalHarnesses = Math.max(totalHarnesses, parseInt(hm[1]));
+  });
+  return { totalCommits, totalProjects, totalHarnesses };
 }
 
 function isoWeekToMonth(year, weekNum) {
@@ -384,10 +394,6 @@ function isoWeekToMonth(year, weekNum) {
   const thursday = new Date(monday);
   thursday.setDate(monday.getDate() + 3);
   return thursday.getMonth() + 1;
-}
-
-function getMonthLabel(m) {
-  return m + '월';
 }
 
 async function init() {
@@ -429,7 +435,7 @@ function buildMemberList() {
       <div class="member-avatar" style="background:${color}">${initials}</div>
       <div class="member-info">
         <div class="member-id">${a.id}</div>
-        <div class="member-name">${displayName !== a.id ? displayName : ''}</div>
+        ${MEMBER_NAMES[a.id] ? `<div class="member-name">${MEMBER_NAMES[a.id]}</div>` : ''}
       </div>
       <span class="member-count">${a.count}</span>
     </button>`;
@@ -438,54 +444,42 @@ function buildMemberList() {
 
 function selectAuthor(authorId) {
   selectedAuthor = authorId;
-  selectedMonth = null;
+  selectedType = 'all';
   buildMemberList();
   document.querySelector('.sidebar').classList.remove('open');
 
   const displayName = MEMBER_NAMES[authorId] || authorId;
-  const label = MEMBER_NAMES[authorId] ? `${authorId} (${displayName})` : authorId;
-  document.getElementById('filter-person').textContent = label;
+  document.getElementById('filter-person').textContent = displayName;
   document.getElementById('filter-bar').style.display = 'flex';
 
-  populateMonthDropdown();
+  document.querySelectorAll('.type-tab').forEach((t, i) => {
+    t.classList.toggle('active', i === 0);
+  });
+
+  populatePeriodDropdown();
+  renderStats();
 }
 
-function populateMonthDropdown() {
-  const reports = allReports.filter(r => r.author === selectedAuthor);
-  const months = [...new Set(reports.map(r => r.year + '-' + String(r.month).padStart(2, '0')))];
-  months.sort().reverse();
-
-  const sel = document.getElementById('month-select');
-  sel.innerHTML = '<option value="all">전체</option>' +
-    months.map(m => {
-      const [y, mm] = m.split('-');
-      return `<option value="${m}">${y}년 ${parseInt(mm)}월</option>`;
-    }).join('');
-
-  if (months.length > 0) {
-    sel.value = months[0];
-    selectedMonth = months[0];
-  }
+function setType(type) {
+  selectedType = type;
+  document.querySelectorAll('.type-tab').forEach(t => {
+    t.classList.toggle('active', t.textContent === (type === 'all' ? '전체' : type === 'weekly' ? '주간' : '월간'));
+  });
   populatePeriodDropdown();
-}
-
-function onMonthChange() {
-  selectedMonth = document.getElementById('month-select').value;
-  populatePeriodDropdown();
+  renderStats();
 }
 
 function populatePeriodDropdown() {
   let reports = allReports.filter(r => r.author === selectedAuthor);
-  if (selectedMonth && selectedMonth !== 'all') {
-    const [y, mm] = selectedMonth.split('-');
-    reports = reports.filter(r => r.year === y && r.month === parseInt(mm));
+  if (selectedType !== 'all') {
+    reports = reports.filter(r => r.periodType === selectedType);
   }
 
   const periods = reports.map(r => ({
     key: r.period,
-    label: r.periodType === 'weekly' ? `${r.period} 주간` : `${parseInt(r.periodNum)}월 월간`,
+    label: r.periodType === 'weekly' ? `${r.period} (${r.year})` : `${r.year}년 ${parseInt(r.periodNum)}월`,
     type: r.periodType,
-    sort: r.period,
+    sort: r.year + r.period,
   }));
   periods.sort((a, b) => b.sort.localeCompare(a.sort));
   const unique = [...new Map(periods.map(p => [p.key, p])).values()];
@@ -497,17 +491,35 @@ function populatePeriodDropdown() {
   renderContent();
 }
 
-function onPeriodChange() {
-  renderContent();
+function renderStats() {
+  let reports = allReports.filter(r => r.author === selectedAuthor);
+  const weeklyCount = reports.filter(r => r.periodType === 'weekly').length;
+  const monthlyCount = reports.filter(r => r.periodType === 'monthly').length;
+  const stats = extractStats(reports);
+
+  let html = '<div class="stats-bar">';
+  html += `<div class="stat-item"><span class="stat-value">${reports.length}</span> 총 보고서</div>`;
+  html += `<div class="stat-item"><span class="stat-dot" style="background:var(--accent)"></span><span class="stat-value blue">${weeklyCount}</span> 주간</div>`;
+  html += `<div class="stat-item"><span class="stat-dot" style="background:var(--warm)"></span><span class="stat-value orange">${monthlyCount}</span> 월간</div>`;
+  if (stats.totalCommits > 0) {
+    html += `<div class="stat-item"><span class="stat-value green">${stats.totalCommits.toLocaleString()}</span> 총 커밋</div>`;
+  }
+  if (stats.totalProjects > 0) {
+    html += `<div class="stat-item"><span class="stat-value">${stats.totalProjects}</span> 활성 프로젝트</div>`;
+  }
+  if (stats.totalHarnesses > 0) {
+    html += `<div class="stat-item"><span class="stat-value">${stats.totalHarnesses}</span> 하네스</div>`;
+  }
+  html += '</div>';
+  document.getElementById('stats-area').innerHTML = html;
 }
 
 function renderContent() {
   const periodVal = document.getElementById('period-select').value;
   let reports = allReports.filter(r => r.author === selectedAuthor);
 
-  if (selectedMonth && selectedMonth !== 'all') {
-    const [y, mm] = selectedMonth.split('-');
-    reports = reports.filter(r => r.year === y && r.month === parseInt(mm));
+  if (selectedType !== 'all') {
+    reports = reports.filter(r => r.periodType === selectedType);
   }
   if (periodVal !== 'all') {
     reports = reports.filter(r => r.period === periodVal);
@@ -520,7 +532,7 @@ function renderContent() {
       <div class="empty-state">
         <div class="icon">&#128196;</div>
         <h3>보고서가 없습니다</h3>
-        <p>선택한 기간에 해당하는 보고서가 없습니다</p>
+        <p>선택한 조건에 해당하는 보고서가 없습니다</p>
       </div>`;
     return;
   }
