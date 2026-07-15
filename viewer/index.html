@@ -7,25 +7,22 @@
 <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
 <style>
   :root {
-    --bg: #F8F8F6;
+    --bg: #F5F5F3;
     --surface: #FFFFFF;
     --sidebar-bg: #1C1F26;
-    --sidebar-text: #C5C7CE;
+    --sidebar-text: #B0B3BC;
     --sidebar-active: #FFFFFF;
-    --sidebar-hover: #2A2D36;
+    --sidebar-hover: #272A33;
     --sidebar-accent: #5B9BD5;
     --text: #1A1C21;
     --text-secondary: #5A5D66;
     --text-muted: #8B8E97;
-    --border: #E5E6E9;
+    --border: #E2E3E7;
     --accent: #2563A0;
     --warm: #D4793A;
     --green: #2D8F5E;
-    --tag-weekly-bg: #2563A018;
-    --tag-weekly: #2563A0;
-    --tag-monthly-bg: #D4793A18;
-    --tag-monthly: #D4793A;
     --shadow: 0 1px 3px rgba(0,0,0,.04);
+    --radius: 10px;
   }
 
   * { margin: 0; padding: 0; box-sizing: border-box; }
@@ -39,468 +36,240 @@
     -webkit-font-smoothing: antialiased;
   }
 
-  /* Sidebar */
+  /* ── Sidebar ── */
   .sidebar {
-    width: 280px;
+    width: 260px;
     min-height: 100vh;
     background: var(--sidebar-bg);
     color: var(--sidebar-text);
     display: flex;
     flex-direction: column;
     position: fixed;
-    left: 0;
-    top: 0;
-    bottom: 0;
+    left: 0; top: 0; bottom: 0;
     z-index: 10;
     overflow-y: auto;
   }
-
   .sidebar-header {
-    padding: 24px 20px 16px;
-    border-bottom: 1px solid rgba(255,255,255,.08);
+    padding: 22px 20px 14px;
+    border-bottom: 1px solid rgba(255,255,255,.07);
   }
-  .sidebar-header h1 {
-    font-size: 16px;
-    font-weight: 700;
-    color: #fff;
-    letter-spacing: -.01em;
-  }
-  .sidebar-header p {
-    font-size: 12px;
-    color: var(--sidebar-text);
-    margin-top: 4px;
+  .sidebar-header h1 { font-size: 15px; font-weight: 700; color: #fff; }
+  .sidebar-header p { font-size: 11px; color: var(--sidebar-text); margin-top: 3px; }
+
+  .sidebar-label {
+    font-size: 10px; font-weight: 700; letter-spacing: .08em; text-transform: uppercase;
+    color: rgba(255,255,255,.28); padding: 16px 20px 6px;
   }
 
-  .sidebar-tabs {
-    display: flex;
-    padding: 12px 16px 0;
-    gap: 4px;
-  }
-  .sidebar-tab {
-    flex: 1;
-    padding: 7px 0;
-    text-align: center;
-    font-size: 13px;
-    font-weight: 600;
-    border-radius: 6px;
-    cursor: pointer;
-    color: var(--sidebar-text);
-    border: none;
-    background: transparent;
-    transition: all .15s;
-  }
-  .sidebar-tab:hover { background: var(--sidebar-hover); }
-  .sidebar-tab.active {
-    background: var(--sidebar-accent);
-    color: #fff;
-  }
-
-  .sidebar-section {
-    padding: 12px 12px 8px;
-  }
-  .sidebar-section-title {
-    font-size: 11px;
-    font-weight: 600;
-    letter-spacing: .06em;
-    text-transform: uppercase;
-    color: rgba(255,255,255,.35);
-    padding: 0 8px;
-    margin-bottom: 6px;
-  }
-
-  .nav-item {
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    padding: 8px 12px;
-    border-radius: 6px;
-    cursor: pointer;
-    font-size: 14px;
-    color: var(--sidebar-text);
-    border: none;
-    background: none;
-    width: 100%;
-    text-align: left;
+  .member-item {
+    display: flex; align-items: center; gap: 10px;
+    padding: 9px 16px; margin: 2px 8px; border-radius: 7px;
+    cursor: pointer; border: none; background: none;
+    width: calc(100% - 16px); text-align: left;
     transition: all .12s;
   }
-  .nav-item:hover { background: var(--sidebar-hover); color: #fff; }
-  .nav-item.active { background: rgba(91,155,213,.2); color: var(--sidebar-active); }
-  .nav-item .badge {
-    font-size: 11px;
-    font-weight: 600;
-    background: rgba(255,255,255,.12);
-    padding: 1px 7px;
-    border-radius: 10px;
+  .member-item:hover { background: var(--sidebar-hover); }
+  .member-item.active { background: rgba(91,155,213,.2); }
+  .member-avatar {
+    width: 32px; height: 32px; border-radius: 50%;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 13px; font-weight: 700; color: #fff; flex-shrink: 0;
   }
-  .nav-item.active .badge { background: var(--sidebar-accent); color: #fff; }
-
-  /* Author pills under period */
-  .nav-authors {
-    display: none;
-    flex-wrap: wrap;
-    gap: 4px;
-    padding: 4px 12px 8px 28px;
+  .member-info { min-width: 0; }
+  .member-id { font-size: 13px; font-weight: 600; color: var(--sidebar-text); }
+  .member-item.active .member-id { color: #fff; }
+  .member-name { font-size: 11px; color: rgba(255,255,255,.4); margin-top: 1px; }
+  .member-item.active .member-name { color: rgba(255,255,255,.65); }
+  .member-count {
+    margin-left: auto; font-size: 11px; font-weight: 600;
+    background: rgba(255,255,255,.1); padding: 1px 7px; border-radius: 10px;
+    color: var(--sidebar-text); flex-shrink: 0;
   }
-  .nav-item.active + .nav-authors { display: flex; }
-  .author-pill {
-    font-size: 12px;
-    padding: 3px 10px;
-    border-radius: 12px;
-    cursor: pointer;
-    border: none;
-    background: rgba(255,255,255,.08);
-    color: var(--sidebar-text);
-    transition: all .12s;
-  }
-  .author-pill:hover { background: rgba(255,255,255,.15); color: #fff; }
-  .author-pill.active { background: var(--sidebar-accent); color: #fff; }
-
-  /* Main content */
-  .main {
-    margin-left: 280px;
-    flex: 1;
-    min-height: 100vh;
-  }
-
-  .content-header {
-    padding: 28px 40px 20px;
-    border-bottom: 1px solid var(--border);
-    background: var(--surface);
-  }
-  .content-header h2 {
-    font-size: 22px;
-    font-weight: 700;
-    letter-spacing: -.02em;
-  }
-  .content-header .meta {
-    font-size: 13px;
-    color: var(--text-muted);
-    margin-top: 4px;
-  }
-  .period-tag {
-    display: inline-block;
-    font-size: 11px;
-    font-weight: 600;
-    letter-spacing: .03em;
-    padding: 2px 8px;
-    border-radius: 4px;
-    margin-right: 6px;
-    position: relative;
-    top: -2px;
-  }
-  .period-tag.weekly { background: var(--tag-weekly-bg); color: var(--tag-weekly); }
-  .period-tag.monthly { background: var(--tag-monthly-bg); color: var(--tag-monthly); }
-
-  .content-body {
-    padding: 32px 40px 60px;
-  }
-
-  /* Report cards */
-  .report-card {
-    background: var(--surface);
-    border: 1px solid var(--border);
-    border-radius: 10px;
-    padding: 28px 32px;
-    margin-bottom: 16px;
-    box-shadow: var(--shadow);
-  }
-  .report-card .author-name {
-    font-size: 18px;
-    font-weight: 700;
-    margin-bottom: 4px;
-    letter-spacing: -.01em;
-  }
-  .report-card .author-summary {
-    font-size: 14px;
-    color: var(--text-secondary);
-    margin-bottom: 16px;
-    padding-bottom: 16px;
-    border-bottom: 1px solid var(--border);
-  }
-
-  /* Markdown content */
-  .md-content h1 { font-size: 20px; font-weight: 700; margin: 24px 0 12px; letter-spacing: -.01em; }
-  .md-content h2 { font-size: 17px; font-weight: 700; margin: 20px 0 10px; color: var(--accent); }
-  .md-content h3 { font-size: 15px; font-weight: 600; margin: 16px 0 8px; }
-  .md-content p { font-size: 14px; line-height: 1.7; margin: 8px 0; color: var(--text-secondary); }
-  .md-content ul, .md-content ol { font-size: 14px; padding-left: 20px; margin: 8px 0; color: var(--text-secondary); }
-  .md-content li { margin: 4px 0; line-height: 1.6; }
-  .md-content blockquote {
-    border-left: 3px solid var(--accent);
-    padding: 8px 16px;
-    margin: 12px 0;
-    background: var(--accent)08;
-    border-radius: 0 6px 6px 0;
-    font-size: 14px;
-    color: var(--text-secondary);
-  }
-  .md-content table {
-    width: 100%;
-    border-collapse: collapse;
-    font-size: 13px;
-    margin: 12px 0;
-  }
-  .md-content th {
-    text-align: left;
-    font-weight: 600;
-    padding: 8px 12px;
-    background: var(--bg);
-    border: 1px solid var(--border);
-    font-size: 12px;
-    letter-spacing: .02em;
-  }
-  .md-content td {
-    padding: 8px 12px;
-    border: 1px solid var(--border);
-    color: var(--text-secondary);
-    line-height: 1.5;
-  }
-  .md-content hr {
-    border: none;
-    border-top: 1px solid var(--border);
-    margin: 20px 0;
-  }
-  .md-content strong { color: var(--text); }
-  .md-content code {
-    background: var(--bg);
-    padding: 2px 6px;
-    border-radius: 4px;
-    font-size: 13px;
-  }
-  .md-content input[type="checkbox"] {
-    margin-right: 6px;
-  }
-
-  /* Empty state */
-  .empty-state {
-    text-align: center;
-    padding: 80px 40px;
-    color: var(--text-muted);
-  }
-  .empty-state .icon {
-    font-size: 48px;
-    margin-bottom: 16px;
-    opacity: .4;
-  }
-  .empty-state h3 {
-    font-size: 18px;
-    font-weight: 600;
-    color: var(--text-secondary);
-    margin-bottom: 8px;
-  }
-  .empty-state p { font-size: 14px; }
-
-  /* Overview cards */
-  .overview-stats {
-    display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
-    gap: 12px;
-    margin-bottom: 24px;
-  }
-  .overview-stat {
-    background: var(--surface);
-    border: 1px solid var(--border);
-    border-radius: 8px;
-    padding: 16px;
-    box-shadow: var(--shadow);
-  }
-  .overview-stat .label {
-    font-size: 12px;
-    color: var(--text-muted);
-    font-weight: 500;
-  }
-  .overview-stat .value {
-    font-size: 28px;
-    font-weight: 700;
-    font-variant-numeric: tabular-nums;
-    margin-top: 4px;
-  }
-  .overview-stat .value.accent { color: var(--accent); }
-  .overview-stat .value.warm { color: var(--warm); }
+  .member-item.active .member-count { background: var(--sidebar-accent); color: #fff; }
 
   /* Guide button */
   .guide-btn {
-    display: flex;
-    align-items: center;
-    gap: 6px;
-    width: calc(100% - 24px);
-    margin: 0 12px;
-    padding: 9px 12px;
-    border-radius: 6px;
-    border: 1px solid rgba(255,255,255,.1);
-    background: transparent;
-    color: var(--sidebar-text);
-    font-size: 13px;
-    font-weight: 500;
-    cursor: pointer;
-    transition: all .12s;
+    display: flex; align-items: center; gap: 6px;
+    width: calc(100% - 24px); margin: 0 12px;
+    padding: 9px 12px; border-radius: 6px;
+    border: 1px solid rgba(255,255,255,.1); background: transparent;
+    color: var(--sidebar-text); font-size: 13px; font-weight: 500;
+    cursor: pointer; transition: all .12s;
   }
   .guide-btn:hover { background: var(--sidebar-hover); color: #fff; }
   .guide-btn svg { flex-shrink: 0; }
 
+  /* ── Main ── */
+  .main { margin-left: 260px; flex: 1; min-height: 100vh; }
+
+  /* Filter bar */
+  .filter-bar {
+    display: flex; align-items: center; gap: 10px; flex-wrap: wrap;
+    padding: 16px 36px;
+    background: var(--surface);
+    border-bottom: 1px solid var(--border);
+    position: sticky; top: 0; z-index: 5;
+  }
+  .filter-bar .person-label {
+    font-size: 15px; font-weight: 700; margin-right: 8px;
+    letter-spacing: -.01em;
+  }
+  .filter-bar .sep {
+    width: 1px; height: 20px; background: var(--border); margin: 0 4px;
+  }
+  .dropdown {
+    position: relative; display: inline-block;
+  }
+  .dropdown select {
+    appearance: none;
+    background: var(--bg);
+    border: 1px solid var(--border);
+    border-radius: 7px;
+    padding: 7px 32px 7px 12px;
+    font-size: 13px; font-weight: 600;
+    color: var(--text);
+    cursor: pointer;
+    font-family: inherit;
+    min-width: 120px;
+  }
+  .dropdown select:focus { outline: none; border-color: var(--accent); }
+  .dropdown::after {
+    content: "";
+    position: absolute; right: 11px; top: 50%;
+    transform: translateY(-50%);
+    border-left: 4px solid transparent;
+    border-right: 4px solid transparent;
+    border-top: 5px solid var(--text-muted);
+    pointer-events: none;
+  }
+  .dropdown label {
+    font-size: 11px; font-weight: 600; color: var(--text-muted);
+    letter-spacing: .03em; margin-right: 6px;
+  }
+
+  /* Content */
+  .content-body { padding: 28px 36px 60px; }
+
+  .report-card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    padding: 28px 32px;
+    margin-bottom: 16px;
+    box-shadow: var(--shadow);
+  }
+  .report-card .report-meta {
+    display: flex; align-items: center; gap: 8px;
+    margin-bottom: 16px; padding-bottom: 14px;
+    border-bottom: 1px solid var(--border);
+  }
+  .report-card .period-badge {
+    font-size: 11px; font-weight: 700; letter-spacing: .03em;
+    padding: 3px 9px; border-radius: 5px;
+  }
+  .period-badge.weekly { background: #2563A014; color: var(--accent); }
+  .period-badge.monthly { background: #D4793A14; color: var(--warm); }
+  .report-card .report-period {
+    font-size: 14px; font-weight: 600; color: var(--text-secondary);
+  }
+
+  /* Markdown */
+  .md-content h1 { font-size: 20px; font-weight: 700; margin: 20px 0 10px; }
+  .md-content h2 { font-size: 16px; font-weight: 700; margin: 18px 0 8px; color: var(--accent); }
+  .md-content h3 { font-size: 14px; font-weight: 600; margin: 14px 0 6px; }
+  .md-content p { font-size: 14px; line-height: 1.7; margin: 6px 0; color: var(--text-secondary); }
+  .md-content ul, .md-content ol { font-size: 14px; padding-left: 20px; margin: 6px 0; color: var(--text-secondary); }
+  .md-content li { margin: 3px 0; line-height: 1.6; }
+  .md-content blockquote {
+    border-left: 3px solid var(--accent); padding: 8px 16px; margin: 10px 0;
+    background: #2563A008; border-radius: 0 6px 6px 0;
+    font-size: 14px; color: var(--text-secondary);
+  }
+  .md-content table { width: 100%; border-collapse: collapse; font-size: 13px; margin: 10px 0; }
+  .md-content th {
+    text-align: left; font-weight: 600; padding: 7px 10px;
+    background: var(--bg); border: 1px solid var(--border); font-size: 12px;
+  }
+  .md-content td {
+    padding: 7px 10px; border: 1px solid var(--border);
+    color: var(--text-secondary); line-height: 1.5;
+  }
+  .md-content hr { border: none; border-top: 1px solid var(--border); margin: 16px 0; }
+  .md-content strong { color: var(--text); }
+  .md-content code { background: var(--bg); padding: 2px 6px; border-radius: 4px; font-size: 13px; }
+
+  /* Empty */
+  .empty-state {
+    text-align: center; padding: 80px 40px; color: var(--text-muted);
+  }
+  .empty-state .icon { font-size: 44px; margin-bottom: 14px; opacity: .35; }
+  .empty-state h3 { font-size: 17px; font-weight: 600; color: var(--text-secondary); margin-bottom: 6px; }
+  .empty-state p { font-size: 14px; }
+
   /* Modal */
   .modal-overlay {
-    display: none;
-    position: fixed;
-    inset: 0;
-    background: rgba(0,0,0,.5);
-    z-index: 100;
-    align-items: center;
-    justify-content: center;
-    padding: 24px;
+    display: none; position: fixed; inset: 0;
+    background: rgba(0,0,0,.5); z-index: 100;
+    align-items: center; justify-content: center; padding: 24px;
   }
   .modal-overlay.open { display: flex; }
   .modal {
-    background: var(--surface);
-    border-radius: 14px;
-    max-width: 640px;
-    width: 100%;
-    max-height: 85vh;
-    overflow-y: auto;
+    background: var(--surface); border-radius: 14px;
+    max-width: 600px; width: 100%; max-height: 85vh; overflow-y: auto;
     box-shadow: 0 20px 60px rgba(0,0,0,.2);
   }
   .modal-header {
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    padding: 20px 24px 16px;
-    border-bottom: 1px solid var(--border);
-    position: sticky;
-    top: 0;
-    background: var(--surface);
-    border-radius: 14px 14px 0 0;
-    z-index: 1;
+    display: flex; align-items: center; justify-content: space-between;
+    padding: 18px 22px 14px; border-bottom: 1px solid var(--border);
+    position: sticky; top: 0; background: var(--surface);
+    border-radius: 14px 14px 0 0; z-index: 1;
   }
-  .modal-header h2 {
-    font-size: 18px;
-    font-weight: 700;
-    letter-spacing: -.01em;
-  }
+  .modal-header h2 { font-size: 17px; font-weight: 700; }
   .modal-close {
-    background: none;
-    border: none;
-    font-size: 22px;
-    cursor: pointer;
-    color: var(--text-muted);
-    padding: 4px 8px;
-    border-radius: 6px;
-    line-height: 1;
+    background: none; border: none; font-size: 22px; cursor: pointer;
+    color: var(--text-muted); padding: 4px 8px; border-radius: 6px; line-height: 1;
   }
   .modal-close:hover { background: var(--bg); color: var(--text); }
-  .modal-body {
-    padding: 20px 24px 28px;
-  }
-  .modal-body h3 {
-    font-size: 15px;
-    font-weight: 700;
-    margin: 20px 0 8px;
-    color: var(--accent);
-  }
+  .modal-body { padding: 18px 22px 24px; }
+  .modal-body h3 { font-size: 14px; font-weight: 700; margin: 18px 0 6px; color: var(--accent); }
   .modal-body h3:first-child { margin-top: 0; }
-  .modal-body p {
-    font-size: 14px;
-    line-height: 1.7;
-    color: var(--text-secondary);
-    margin: 6px 0;
-  }
-  .modal-body code {
-    background: var(--bg);
-    padding: 2px 7px;
-    border-radius: 4px;
-    font-size: 13px;
-    font-family: "Consolas", "SF Mono", monospace;
-    color: var(--accent);
-  }
+  .modal-body p { font-size: 13px; line-height: 1.7; color: var(--text-secondary); margin: 4px 0; }
+  .modal-body code { background: var(--bg); padding: 2px 6px; border-radius: 4px; font-size: 12px; color: var(--accent); font-family: Consolas, monospace; }
   .modal-body pre {
-    background: var(--sidebar-bg);
-    color: #E4E5E9;
-    padding: 14px 16px;
-    border-radius: 8px;
-    font-size: 13px;
-    font-family: "Consolas", "SF Mono", monospace;
-    line-height: 1.6;
-    overflow-x: auto;
-    margin: 10px 0;
+    background: var(--sidebar-bg); color: #E4E5E9; padding: 12px 14px;
+    border-radius: 8px; font-size: 12px; font-family: Consolas, monospace;
+    line-height: 1.6; overflow-x: auto; margin: 8px 0;
   }
-  .step-list {
-    counter-reset: step;
-    list-style: none;
-    padding: 0;
-    margin: 10px 0;
-  }
+  .step-list { counter-reset: step; list-style: none; padding: 0; margin: 8px 0; }
   .step-list li {
-    counter-increment: step;
-    display: flex;
-    gap: 12px;
-    padding: 10px 0;
-    font-size: 14px;
-    line-height: 1.6;
-    color: var(--text-secondary);
+    counter-increment: step; display: flex; gap: 10px; padding: 8px 0;
+    font-size: 13px; line-height: 1.6; color: var(--text-secondary);
     border-bottom: 1px solid var(--border);
   }
   .step-list li:last-child { border-bottom: none; }
   .step-list li::before {
-    content: counter(step);
-    flex-shrink: 0;
-    width: 24px;
-    height: 24px;
-    border-radius: 50%;
-    background: var(--accent);
-    color: #fff;
-    font-size: 12px;
-    font-weight: 700;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    margin-top: 1px;
+    content: counter(step); flex-shrink: 0;
+    width: 22px; height: 22px; border-radius: 50%;
+    background: var(--accent); color: #fff; font-size: 11px; font-weight: 700;
+    display: flex; align-items: center; justify-content: center; margin-top: 1px;
   }
-  .cmd-table {
-    width: 100%;
-    border-collapse: collapse;
-    font-size: 13px;
-    margin: 10px 0;
-  }
-  .cmd-table td {
-    padding: 8px 10px;
-    border: 1px solid var(--border);
-    vertical-align: top;
-  }
-  .cmd-table td:first-child {
-    font-family: "Consolas", "SF Mono", monospace;
-    color: var(--accent);
-    white-space: nowrap;
-    background: var(--bg);
-    font-size: 12px;
-  }
-  .cmd-table td:last-child { color: var(--text-secondary); }
+  .cmd-table { width: 100%; border-collapse: collapse; font-size: 12px; margin: 8px 0; }
+  .cmd-table td { padding: 6px 8px; border: 1px solid var(--border); vertical-align: top; }
+  .cmd-table td:first-child { font-family: Consolas, monospace; color: var(--accent); white-space: nowrap; background: var(--bg); }
 
   /* Mobile */
   .mobile-toggle {
-    display: none;
-    position: fixed;
-    top: 12px;
-    left: 12px;
-    z-index: 20;
-    background: var(--sidebar-bg);
-    color: #fff;
-    border: none;
-    border-radius: 8px;
-    width: 40px;
-    height: 40px;
-    font-size: 20px;
-    cursor: pointer;
+    display: none; position: fixed; top: 12px; left: 12px; z-index: 20;
+    background: var(--sidebar-bg); color: #fff; border: none; border-radius: 8px;
+    width: 40px; height: 40px; font-size: 20px; cursor: pointer;
   }
-
   @media (max-width: 768px) {
-    .sidebar {
-      transform: translateX(-100%);
-      transition: transform .2s;
-    }
+    .sidebar { transform: translateX(-100%); transition: transform .2s; }
     .sidebar.open { transform: translateX(0); }
     .main { margin-left: 0; }
     .mobile-toggle { display: flex; align-items: center; justify-content: center; }
-    .content-header, .content-body { padding-left: 20px; padding-right: 20px; }
-    .content-header { padding-top: 56px; }
+    .filter-bar { padding: 14px 16px; padding-top: 52px; }
+    .content-body { padding: 20px 16px 60px; }
   }
 </style>
 </head>
@@ -513,15 +282,8 @@
     <h1>작업 보고서</h1>
     <p>바잇미 전략기획팀</p>
   </div>
-
-  <div class="sidebar-tabs">
-    <button class="sidebar-tab active" data-type="all" onclick="filterType('all')">전체</button>
-    <button class="sidebar-tab" data-type="weekly" onclick="filterType('weekly')">주간</button>
-    <button class="sidebar-tab" data-type="monthly" onclick="filterType('monthly')">월간</button>
-  </div>
-
-  <nav id="nav-list"></nav>
-
+  <div class="sidebar-label">팀원</div>
+  <div id="member-list"></div>
   <div style="flex:1"></div>
   <div style="padding:12px 12px 16px;">
     <button class="guide-btn" onclick="document.getElementById('guide-modal').classList.add('open')">
@@ -531,6 +293,28 @@
   </div>
 </aside>
 
+<main class="main">
+  <div class="filter-bar" id="filter-bar" style="display:none">
+    <span class="person-label" id="filter-person"></span>
+    <span class="sep"></span>
+    <span class="dropdown">
+      <label>월</label>
+      <select id="month-select" onchange="onMonthChange()"></select>
+    </span>
+    <span class="dropdown">
+      <label>기간</label>
+      <select id="period-select" onchange="onPeriodChange()"></select>
+    </span>
+  </div>
+  <div id="content-area">
+    <div class="empty-state">
+      <div class="icon">&#128203;</div>
+      <h3>팀원을 선택하세요</h3>
+      <p>왼쪽 목록에서 팀원을 선택하면 보고서가 표시됩니다</p>
+    </div>
+  </div>
+</main>
+
 <!-- Guide Modal -->
 <div class="modal-overlay" id="guide-modal" onclick="if(event.target===this)this.classList.remove('open')">
   <div class="modal">
@@ -539,7 +323,6 @@
       <button class="modal-close" onclick="document.getElementById('guide-modal').classList.remove('open')">&times;</button>
     </div>
     <div class="modal-body">
-
       <h3>보고서 작성 (팀원)</h3>
       <ol class="step-list">
         <li>레포를 clone합니다<pre>git clone https://github.com/biteme-official/weekly-reports.git
@@ -553,205 +336,198 @@ cd weekly-reports</pre></li>
 git commit -m "W28 주간 보고서 제출"
 git push</pre></li>
       </ol>
-
       <h3>파일 위치 규칙</h3>
       <table class="cmd-table">
         <tr><td>reports/2026/W28/이름.md</td><td>주간 보고서 (ISO 주차)</td></tr>
         <tr><td>reports/2026/M07/이름.md</td><td>월간 보고서</td></tr>
         <tr><td>reports/2026/W28/SUMMARY.md</td><td>관리자 취합본</td></tr>
       </table>
-
       <h3>보고서 확인 (관리자)</h3>
-      <p>이 뷰어에서 바로 확인 가능합니다.</p>
-      <p><strong>전체/주간/월간</strong> 탭으로 필터링하고, 기간을 클릭하면 해당 기간 전체 보고서가 표시됩니다. 이름을 클릭하면 개인 보고서만 볼 수 있습니다.</p>
-
+      <p>이 뷰어에서 팀원 선택 → 월/기간 드롭다운으로 확인합니다.</p>
       <h3>취합본 생성 (관리자)</h3>
-      <p>이 레포 폴더에서 Claude Code를 실행한 후:</p>
+      <p>레포 폴더에서 Claude Code 실행 후:</p>
       <pre>취합본 생성해줘  # 또는 SUMMARY 만들어줘</pre>
-      <p>해당 주차의 모든 보고서를 읽고 <code>SUMMARY.md</code>를 자동 생성합니다.</p>
-
       <h3>사전 준비</h3>
-      <p>Claude Code가 설치되어 있어야 합니다:</p>
       <pre>npm install -g @anthropic-ai/claude-code</pre>
-
     </div>
   </div>
 </div>
 
-<main class="main">
-  <div id="content-area">
-    <div class="empty-state">
-      <div class="icon">&#128203;</div>
-      <h3>보고서를 선택하세요</h3>
-      <p>왼쪽 메뉴에서 기간을 선택하면 보고서가 표시됩니다</p>
-    </div>
-  </div>
-</main>
-
 <script>
+const AVATAR_COLORS = ['#5B9BD5','#D4793A','#2D8F5E','#8B5CF6','#EC4899','#0EA5E9','#F59E0B','#6366F1'];
+const MEMBER_NAMES = {
+  'bmahsang': '김상현',
+};
+
 let allReports = [];
-let currentType = 'all';
-let currentPeriod = null;
-let currentAuthor = null;
+let selectedAuthor = null;
+let selectedMonth = null;
+
+function isoWeekToMonth(year, weekNum) {
+  const jan4 = new Date(year, 0, 4);
+  const dayOfWeek = jan4.getDay() || 7;
+  const monday = new Date(jan4);
+  monday.setDate(jan4.getDate() - dayOfWeek + 1 + (weekNum - 1) * 7);
+  const thursday = new Date(monday);
+  thursday.setDate(monday.getDate() + 3);
+  return thursday.getMonth() + 1;
+}
+
+function getMonthLabel(m) {
+  return m + '월';
+}
 
 async function init() {
   try {
     const res = await fetch('reports.json');
     allReports = await res.json();
-  } catch (e) {
-    allReports = [];
-  }
-  buildNav();
+  } catch (e) { allReports = []; }
 
-  if (allReports.length > 0) {
-    const first = allReports[0];
-    selectPeriod(first.year + '/' + first.period);
-  }
-}
-
-function filterType(type) {
-  currentType = type;
-  document.querySelectorAll('.sidebar-tab').forEach(t => {
-    t.classList.toggle('active', t.dataset.type === type);
-  });
-  buildNav();
-}
-
-function getFiltered() {
-  if (currentType === 'all') return allReports;
-  return allReports.filter(r => r.periodType === currentType);
-}
-
-function buildNav() {
-  const filtered = getFiltered();
-  const grouped = {};
-  filtered.forEach(r => {
-    const key = r.year + '/' + r.period;
-    if (!grouped[key]) grouped[key] = [];
-    grouped[key].push(r);
-  });
-
-  const nav = document.getElementById('nav-list');
-  let html = '';
-  let lastYear = '';
-
-  Object.keys(grouped).forEach(key => {
-    const reports = grouped[key];
-    const [year, period] = key.split('/');
-    const isWeekly = period.startsWith('W');
-
-    if (year !== lastYear) {
-      html += `<div class="sidebar-section"><div class="sidebar-section-title">${year}</div></div>`;
-      lastYear = year;
+  allReports.forEach(r => {
+    if (r.periodType === 'weekly') {
+      r.month = isoWeekToMonth(parseInt(r.year), parseInt(r.periodNum));
+    } else {
+      r.month = parseInt(r.periodNum);
     }
-
-    const label = isWeekly ? `${period} 주간` : `${period.replace('M','')}월 월간`;
-    const isActive = currentPeriod === key;
-
-    html += `<button class="nav-item${isActive ? ' active' : ''}" onclick="selectPeriod('${key}')">
-      <span>${label}</span>
-      <span class="badge">${reports.length}</span>
-    </button>`;
-
-    html += `<div class="nav-authors">`;
-    reports.forEach(r => {
-      const authorActive = isActive && currentAuthor === r.author;
-      html += `<button class="author-pill${authorActive ? ' active' : ''}" onclick="event.stopPropagation();selectAuthor('${key}','${r.author}')">${r.author}</button>`;
-    });
-    html += `</div>`;
   });
 
-  if (!html) {
-    html = `<div class="sidebar-section" style="padding:24px 20px;color:rgba(255,255,255,.4);font-size:13px;">보고서가 없습니다</div>`;
+  buildMemberList();
+}
+
+function getAuthors() {
+  const map = {};
+  allReports.forEach(r => {
+    if (!map[r.author]) map[r.author] = { id: r.author, count: 0 };
+    map[r.author].count++;
+  });
+  return Object.values(map).sort((a, b) => b.count - a.count);
+}
+
+function buildMemberList() {
+  const authors = getAuthors();
+  const el = document.getElementById('member-list');
+  el.innerHTML = authors.map((a, i) => {
+    const color = AVATAR_COLORS[i % AVATAR_COLORS.length];
+    const displayName = MEMBER_NAMES[a.id] || a.id;
+    const initials = displayName.slice(0, 1);
+    const isActive = selectedAuthor === a.id;
+    return `<button class="member-item${isActive ? ' active' : ''}" onclick="selectAuthor('${a.id}')">
+      <div class="member-avatar" style="background:${color}">${initials}</div>
+      <div class="member-info">
+        <div class="member-id">${a.id}</div>
+        <div class="member-name">${displayName !== a.id ? displayName : ''}</div>
+      </div>
+      <span class="member-count">${a.count}</span>
+    </button>`;
+  }).join('');
+}
+
+function selectAuthor(authorId) {
+  selectedAuthor = authorId;
+  selectedMonth = null;
+  buildMemberList();
+  document.querySelector('.sidebar').classList.remove('open');
+
+  const displayName = MEMBER_NAMES[authorId] || authorId;
+  const label = MEMBER_NAMES[authorId] ? `${authorId} (${displayName})` : authorId;
+  document.getElementById('filter-person').textContent = label;
+  document.getElementById('filter-bar').style.display = 'flex';
+
+  populateMonthDropdown();
+}
+
+function populateMonthDropdown() {
+  const reports = allReports.filter(r => r.author === selectedAuthor);
+  const months = [...new Set(reports.map(r => r.year + '-' + String(r.month).padStart(2, '0')))];
+  months.sort().reverse();
+
+  const sel = document.getElementById('month-select');
+  sel.innerHTML = '<option value="all">전체</option>' +
+    months.map(m => {
+      const [y, mm] = m.split('-');
+      return `<option value="${m}">${y}년 ${parseInt(mm)}월</option>`;
+    }).join('');
+
+  if (months.length > 0) {
+    sel.value = months[0];
+    selectedMonth = months[0];
+  }
+  populatePeriodDropdown();
+}
+
+function onMonthChange() {
+  selectedMonth = document.getElementById('month-select').value;
+  populatePeriodDropdown();
+}
+
+function populatePeriodDropdown() {
+  let reports = allReports.filter(r => r.author === selectedAuthor);
+  if (selectedMonth && selectedMonth !== 'all') {
+    const [y, mm] = selectedMonth.split('-');
+    reports = reports.filter(r => r.year === y && r.month === parseInt(mm));
   }
 
-  nav.innerHTML = html;
+  const periods = reports.map(r => ({
+    key: r.period,
+    label: r.periodType === 'weekly' ? `${r.period} 주간` : `${parseInt(r.periodNum)}월 월간`,
+    type: r.periodType,
+    sort: r.period,
+  }));
+  periods.sort((a, b) => b.sort.localeCompare(a.sort));
+  const unique = [...new Map(periods.map(p => [p.key, p])).values()];
+
+  const sel = document.getElementById('period-select');
+  sel.innerHTML = '<option value="all">전체</option>' +
+    unique.map(p => `<option value="${p.key}">${p.label}</option>`).join('');
+
+  renderContent();
 }
 
-function selectPeriod(key) {
-  currentPeriod = key;
-  currentAuthor = null;
-  buildNav();
-  renderReports(key);
-  document.querySelector('.sidebar').classList.remove('open');
+function onPeriodChange() {
+  renderContent();
 }
 
-function selectAuthor(key, author) {
-  currentPeriod = key;
-  currentAuthor = author;
-  buildNav();
-  renderReports(key, author);
-  document.querySelector('.sidebar').classList.remove('open');
-}
+function renderContent() {
+  const periodVal = document.getElementById('period-select').value;
+  let reports = allReports.filter(r => r.author === selectedAuthor);
 
-function renderReports(key, authorFilter) {
-  const [year, period] = key.split('/');
-  const isWeekly = period.startsWith('W');
-  const reports = allReports.filter(r => r.year === year && r.period === period);
+  if (selectedMonth && selectedMonth !== 'all') {
+    const [y, mm] = selectedMonth.split('-');
+    reports = reports.filter(r => r.year === y && r.month === parseInt(mm));
+  }
+  if (periodVal !== 'all') {
+    reports = reports.filter(r => r.period === periodVal);
+  }
 
-  if (authorFilter) {
-    const r = reports.find(r => r.author === authorFilter);
-    if (r) renderSingle(r, reports.length);
+  reports.sort((a, b) => (b.year + b.period).localeCompare(a.year + a.period));
+
+  if (reports.length === 0) {
+    document.getElementById('content-area').innerHTML = `
+      <div class="empty-state">
+        <div class="icon">&#128196;</div>
+        <h3>보고서가 없습니다</h3>
+        <p>선택한 기간에 해당하는 보고서가 없습니다</p>
+      </div>`;
     return;
   }
 
-  const periodLabel = isWeekly ? `${period} 주간 보고서` : `${year}년 ${period.replace('M','')}월 월간 보고서`;
-  const tagClass = isWeekly ? 'weekly' : 'monthly';
-  const tagLabel = isWeekly ? '주간' : '월간';
-
-  let html = `
-    <div class="content-header">
-      <h2><span class="period-tag ${tagClass}">${tagLabel}</span>${periodLabel}</h2>
-      <div class="meta">${reports.length}명 제출 · ${year}</div>
-    </div>
-    <div class="content-body">
-      <div class="overview-stats">
-        <div class="overview-stat">
-          <div class="label">제출 인원</div>
-          <div class="value accent">${reports.length}</div>
-        </div>
-        <div class="overview-stat">
-          <div class="label">유형</div>
-          <div class="value warm">${tagLabel}</div>
-        </div>
-      </div>
-  `;
-
+  let html = '<div class="content-body">';
   reports.forEach(r => {
     const rendered = marked.parse(r.content);
-    html += `
-      <div class="report-card">
-        <div class="author-name">${r.author}</div>
-        <div class="author-summary">${r.summary || ''}</div>
-        <div class="md-content">${rendered}</div>
+    const isWeekly = r.periodType === 'weekly';
+    const badgeClass = isWeekly ? 'weekly' : 'monthly';
+    const badgeLabel = isWeekly ? '주간' : '월간';
+    const periodLabel = isWeekly ? `${r.period} (${r.year})` : `${r.year}년 ${parseInt(r.periodNum)}월`;
+
+    html += `<div class="report-card">
+      <div class="report-meta">
+        <span class="period-badge ${badgeClass}">${badgeLabel}</span>
+        <span class="report-period">${periodLabel}</span>
       </div>
-    `;
+      <div class="md-content">${rendered}</div>
+    </div>`;
   });
-
   html += '</div>';
-  document.getElementById('content-area').innerHTML = html;
-}
-
-function renderSingle(r, totalCount) {
-  const isWeekly = r.periodType === 'weekly';
-  const tagClass = isWeekly ? 'weekly' : 'monthly';
-  const tagLabel = isWeekly ? '주간' : '월간';
-  const periodLabel = isWeekly ? `${r.period} 주간` : `${r.year}년 ${r.period.replace('M','')}월`;
-
-  const rendered = marked.parse(r.content);
-
-  const html = `
-    <div class="content-header">
-      <h2><span class="period-tag ${tagClass}">${tagLabel}</span>${r.author} — ${periodLabel}</h2>
-      <div class="meta">${r.year}</div>
-    </div>
-    <div class="content-body">
-      <div class="report-card">
-        <div class="md-content">${rendered}</div>
-      </div>
-    </div>
-  `;
-
   document.getElementById('content-area').innerHTML = html;
 }
 
