@@ -1,0 +1,95 @@
+name: Deploy Report Viewer
+
+on:
+  push:
+    branches: [master]
+    paths:
+      - 'reports/**'
+      - 'viewer/**'
+      - '.github/workflows/deploy-viewer.yml'
+
+permissions:
+  contents: read
+  pages: write
+  id-token: write
+
+concurrency:
+  group: pages
+  cancel-in-progress: true
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Build report index
+        run: |
+          mkdir -p _site
+          cp viewer/index.html _site/index.html
+
+          # Generate reports.json from all markdown files
+          python3 << 'PYEOF'
+          import os, json, re
+
+          reports = []
+          reports_dir = "reports"
+
+          for root, dirs, files in os.walk(reports_dir):
+              dirs.sort()
+              for f in sorted(files):
+                  if not f.endswith(".md"):
+                      continue
+                  path = os.path.join(root, f)
+                  parts = path.replace("\\", "/").split("/")
+                  # reports/2026/W29/name.md or reports/2026/M07/name.md
+                  if len(parts) < 4:
+                      continue
+                  year = parts[1]
+                  period = parts[2]  # W29 or M07
+                  author = os.path.splitext(parts[3])[0]
+
+                  period_type = "weekly" if period.startswith("W") else "monthly"
+                  period_num = period[1:]
+
+                  with open(path, "r", encoding="utf-8") as fh:
+                      content = fh.read()
+
+                  # Extract summary from "## 1. 주간 요약" or first blockquote
+                  summary = ""
+                  m = re.search(r">\s*(.+)", content)
+                  if m:
+                      summary = m.group(1).strip()
+
+                  reports.append({
+                      "year": year,
+                      "period": period,
+                      "periodType": period_type,
+                      "periodNum": period_num,
+                      "author": author,
+                      "summary": summary,
+                      "content": content,
+                  })
+
+          # Sort: newest first, then by author
+          reports.sort(key=lambda r: (r["year"], r["period"]), reverse=True)
+
+          with open("_site/reports.json", "w", encoding="utf-8") as f:
+              json.dump(reports, f, ensure_ascii=False, indent=2)
+
+          print(f"Generated index with {len(reports)} reports")
+          PYEOF
+
+      - uses: actions/upload-pages-artifact@v3
+        with:
+          path: _site
+
+  deploy:
+    needs: build
+    runs-on: ubuntu-latest
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    steps:
+      - id: deployment
+        uses: actions/deploy-pages@v4

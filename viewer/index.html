@@ -1,0 +1,550 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>작업 보고서 뷰어</title>
+<script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
+<style>
+  :root {
+    --bg: #F8F8F6;
+    --surface: #FFFFFF;
+    --sidebar-bg: #1C1F26;
+    --sidebar-text: #C5C7CE;
+    --sidebar-active: #FFFFFF;
+    --sidebar-hover: #2A2D36;
+    --sidebar-accent: #5B9BD5;
+    --text: #1A1C21;
+    --text-secondary: #5A5D66;
+    --text-muted: #8B8E97;
+    --border: #E5E6E9;
+    --accent: #2563A0;
+    --warm: #D4793A;
+    --green: #2D8F5E;
+    --tag-weekly-bg: #2563A018;
+    --tag-weekly: #2563A0;
+    --tag-monthly-bg: #D4793A18;
+    --tag-monthly: #D4793A;
+    --shadow: 0 1px 3px rgba(0,0,0,.04);
+  }
+
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+
+  body {
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", "Apple SD Gothic Neo", "Malgun Gothic", sans-serif;
+    background: var(--bg);
+    color: var(--text);
+    display: flex;
+    min-height: 100vh;
+    -webkit-font-smoothing: antialiased;
+  }
+
+  /* Sidebar */
+  .sidebar {
+    width: 280px;
+    min-height: 100vh;
+    background: var(--sidebar-bg);
+    color: var(--sidebar-text);
+    display: flex;
+    flex-direction: column;
+    position: fixed;
+    left: 0;
+    top: 0;
+    bottom: 0;
+    z-index: 10;
+    overflow-y: auto;
+  }
+
+  .sidebar-header {
+    padding: 24px 20px 16px;
+    border-bottom: 1px solid rgba(255,255,255,.08);
+  }
+  .sidebar-header h1 {
+    font-size: 16px;
+    font-weight: 700;
+    color: #fff;
+    letter-spacing: -.01em;
+  }
+  .sidebar-header p {
+    font-size: 12px;
+    color: var(--sidebar-text);
+    margin-top: 4px;
+  }
+
+  .sidebar-tabs {
+    display: flex;
+    padding: 12px 16px 0;
+    gap: 4px;
+  }
+  .sidebar-tab {
+    flex: 1;
+    padding: 7px 0;
+    text-align: center;
+    font-size: 13px;
+    font-weight: 600;
+    border-radius: 6px;
+    cursor: pointer;
+    color: var(--sidebar-text);
+    border: none;
+    background: transparent;
+    transition: all .15s;
+  }
+  .sidebar-tab:hover { background: var(--sidebar-hover); }
+  .sidebar-tab.active {
+    background: var(--sidebar-accent);
+    color: #fff;
+  }
+
+  .sidebar-section {
+    padding: 12px 12px 8px;
+  }
+  .sidebar-section-title {
+    font-size: 11px;
+    font-weight: 600;
+    letter-spacing: .06em;
+    text-transform: uppercase;
+    color: rgba(255,255,255,.35);
+    padding: 0 8px;
+    margin-bottom: 6px;
+  }
+
+  .nav-item {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 8px 12px;
+    border-radius: 6px;
+    cursor: pointer;
+    font-size: 14px;
+    color: var(--sidebar-text);
+    border: none;
+    background: none;
+    width: 100%;
+    text-align: left;
+    transition: all .12s;
+  }
+  .nav-item:hover { background: var(--sidebar-hover); color: #fff; }
+  .nav-item.active { background: rgba(91,155,213,.2); color: var(--sidebar-active); }
+  .nav-item .badge {
+    font-size: 11px;
+    font-weight: 600;
+    background: rgba(255,255,255,.12);
+    padding: 1px 7px;
+    border-radius: 10px;
+  }
+  .nav-item.active .badge { background: var(--sidebar-accent); color: #fff; }
+
+  /* Author pills under period */
+  .nav-authors {
+    display: none;
+    flex-wrap: wrap;
+    gap: 4px;
+    padding: 4px 12px 8px 28px;
+  }
+  .nav-item.active + .nav-authors { display: flex; }
+  .author-pill {
+    font-size: 12px;
+    padding: 3px 10px;
+    border-radius: 12px;
+    cursor: pointer;
+    border: none;
+    background: rgba(255,255,255,.08);
+    color: var(--sidebar-text);
+    transition: all .12s;
+  }
+  .author-pill:hover { background: rgba(255,255,255,.15); color: #fff; }
+  .author-pill.active { background: var(--sidebar-accent); color: #fff; }
+
+  /* Main content */
+  .main {
+    margin-left: 280px;
+    flex: 1;
+    min-height: 100vh;
+  }
+
+  .content-header {
+    padding: 28px 40px 20px;
+    border-bottom: 1px solid var(--border);
+    background: var(--surface);
+  }
+  .content-header h2 {
+    font-size: 22px;
+    font-weight: 700;
+    letter-spacing: -.02em;
+  }
+  .content-header .meta {
+    font-size: 13px;
+    color: var(--text-muted);
+    margin-top: 4px;
+  }
+  .period-tag {
+    display: inline-block;
+    font-size: 11px;
+    font-weight: 600;
+    letter-spacing: .03em;
+    padding: 2px 8px;
+    border-radius: 4px;
+    margin-right: 6px;
+    position: relative;
+    top: -2px;
+  }
+  .period-tag.weekly { background: var(--tag-weekly-bg); color: var(--tag-weekly); }
+  .period-tag.monthly { background: var(--tag-monthly-bg); color: var(--tag-monthly); }
+
+  .content-body {
+    padding: 32px 40px 60px;
+  }
+
+  /* Report cards */
+  .report-card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    padding: 28px 32px;
+    margin-bottom: 16px;
+    box-shadow: var(--shadow);
+  }
+  .report-card .author-name {
+    font-size: 18px;
+    font-weight: 700;
+    margin-bottom: 4px;
+    letter-spacing: -.01em;
+  }
+  .report-card .author-summary {
+    font-size: 14px;
+    color: var(--text-secondary);
+    margin-bottom: 16px;
+    padding-bottom: 16px;
+    border-bottom: 1px solid var(--border);
+  }
+
+  /* Markdown content */
+  .md-content h1 { font-size: 20px; font-weight: 700; margin: 24px 0 12px; letter-spacing: -.01em; }
+  .md-content h2 { font-size: 17px; font-weight: 700; margin: 20px 0 10px; color: var(--accent); }
+  .md-content h3 { font-size: 15px; font-weight: 600; margin: 16px 0 8px; }
+  .md-content p { font-size: 14px; line-height: 1.7; margin: 8px 0; color: var(--text-secondary); }
+  .md-content ul, .md-content ol { font-size: 14px; padding-left: 20px; margin: 8px 0; color: var(--text-secondary); }
+  .md-content li { margin: 4px 0; line-height: 1.6; }
+  .md-content blockquote {
+    border-left: 3px solid var(--accent);
+    padding: 8px 16px;
+    margin: 12px 0;
+    background: var(--accent)08;
+    border-radius: 0 6px 6px 0;
+    font-size: 14px;
+    color: var(--text-secondary);
+  }
+  .md-content table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 13px;
+    margin: 12px 0;
+  }
+  .md-content th {
+    text-align: left;
+    font-weight: 600;
+    padding: 8px 12px;
+    background: var(--bg);
+    border: 1px solid var(--border);
+    font-size: 12px;
+    letter-spacing: .02em;
+  }
+  .md-content td {
+    padding: 8px 12px;
+    border: 1px solid var(--border);
+    color: var(--text-secondary);
+    line-height: 1.5;
+  }
+  .md-content hr {
+    border: none;
+    border-top: 1px solid var(--border);
+    margin: 20px 0;
+  }
+  .md-content strong { color: var(--text); }
+  .md-content code {
+    background: var(--bg);
+    padding: 2px 6px;
+    border-radius: 4px;
+    font-size: 13px;
+  }
+  .md-content input[type="checkbox"] {
+    margin-right: 6px;
+  }
+
+  /* Empty state */
+  .empty-state {
+    text-align: center;
+    padding: 80px 40px;
+    color: var(--text-muted);
+  }
+  .empty-state .icon {
+    font-size: 48px;
+    margin-bottom: 16px;
+    opacity: .4;
+  }
+  .empty-state h3 {
+    font-size: 18px;
+    font-weight: 600;
+    color: var(--text-secondary);
+    margin-bottom: 8px;
+  }
+  .empty-state p { font-size: 14px; }
+
+  /* Overview cards */
+  .overview-stats {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
+    gap: 12px;
+    margin-bottom: 24px;
+  }
+  .overview-stat {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    padding: 16px;
+    box-shadow: var(--shadow);
+  }
+  .overview-stat .label {
+    font-size: 12px;
+    color: var(--text-muted);
+    font-weight: 500;
+  }
+  .overview-stat .value {
+    font-size: 28px;
+    font-weight: 700;
+    font-variant-numeric: tabular-nums;
+    margin-top: 4px;
+  }
+  .overview-stat .value.accent { color: var(--accent); }
+  .overview-stat .value.warm { color: var(--warm); }
+
+  /* Mobile */
+  .mobile-toggle {
+    display: none;
+    position: fixed;
+    top: 12px;
+    left: 12px;
+    z-index: 20;
+    background: var(--sidebar-bg);
+    color: #fff;
+    border: none;
+    border-radius: 8px;
+    width: 40px;
+    height: 40px;
+    font-size: 20px;
+    cursor: pointer;
+  }
+
+  @media (max-width: 768px) {
+    .sidebar {
+      transform: translateX(-100%);
+      transition: transform .2s;
+    }
+    .sidebar.open { transform: translateX(0); }
+    .main { margin-left: 0; }
+    .mobile-toggle { display: flex; align-items: center; justify-content: center; }
+    .content-header, .content-body { padding-left: 20px; padding-right: 20px; }
+    .content-header { padding-top: 56px; }
+  }
+</style>
+</head>
+<body>
+
+<button class="mobile-toggle" onclick="document.querySelector('.sidebar').classList.toggle('open')">&#9776;</button>
+
+<aside class="sidebar">
+  <div class="sidebar-header">
+    <h1>작업 보고서</h1>
+    <p>바잇미 전략기획팀</p>
+  </div>
+
+  <div class="sidebar-tabs">
+    <button class="sidebar-tab active" data-type="all" onclick="filterType('all')">전체</button>
+    <button class="sidebar-tab" data-type="weekly" onclick="filterType('weekly')">주간</button>
+    <button class="sidebar-tab" data-type="monthly" onclick="filterType('monthly')">월간</button>
+  </div>
+
+  <nav id="nav-list"></nav>
+</aside>
+
+<main class="main">
+  <div id="content-area">
+    <div class="empty-state">
+      <div class="icon">&#128203;</div>
+      <h3>보고서를 선택하세요</h3>
+      <p>왼쪽 메뉴에서 기간을 선택하면 보고서가 표시됩니다</p>
+    </div>
+  </div>
+</main>
+
+<script>
+let allReports = [];
+let currentType = 'all';
+let currentPeriod = null;
+let currentAuthor = null;
+
+async function init() {
+  try {
+    const res = await fetch('reports.json');
+    allReports = await res.json();
+  } catch (e) {
+    allReports = [];
+  }
+  buildNav();
+
+  if (allReports.length > 0) {
+    const first = allReports[0];
+    selectPeriod(first.year + '/' + first.period);
+  }
+}
+
+function filterType(type) {
+  currentType = type;
+  document.querySelectorAll('.sidebar-tab').forEach(t => {
+    t.classList.toggle('active', t.dataset.type === type);
+  });
+  buildNav();
+}
+
+function getFiltered() {
+  if (currentType === 'all') return allReports;
+  return allReports.filter(r => r.periodType === currentType);
+}
+
+function buildNav() {
+  const filtered = getFiltered();
+  const grouped = {};
+  filtered.forEach(r => {
+    const key = r.year + '/' + r.period;
+    if (!grouped[key]) grouped[key] = [];
+    grouped[key].push(r);
+  });
+
+  const nav = document.getElementById('nav-list');
+  let html = '';
+  let lastYear = '';
+
+  Object.keys(grouped).forEach(key => {
+    const reports = grouped[key];
+    const [year, period] = key.split('/');
+    const isWeekly = period.startsWith('W');
+
+    if (year !== lastYear) {
+      html += `<div class="sidebar-section"><div class="sidebar-section-title">${year}</div></div>`;
+      lastYear = year;
+    }
+
+    const label = isWeekly ? `${period} 주간` : `${period.replace('M','')}월 월간`;
+    const isActive = currentPeriod === key;
+
+    html += `<button class="nav-item${isActive ? ' active' : ''}" onclick="selectPeriod('${key}')">
+      <span>${label}</span>
+      <span class="badge">${reports.length}</span>
+    </button>`;
+
+    html += `<div class="nav-authors">`;
+    reports.forEach(r => {
+      const authorActive = isActive && currentAuthor === r.author;
+      html += `<button class="author-pill${authorActive ? ' active' : ''}" onclick="event.stopPropagation();selectAuthor('${key}','${r.author}')">${r.author}</button>`;
+    });
+    html += `</div>`;
+  });
+
+  if (!html) {
+    html = `<div class="sidebar-section" style="padding:24px 20px;color:rgba(255,255,255,.4);font-size:13px;">보고서가 없습니다</div>`;
+  }
+
+  nav.innerHTML = html;
+}
+
+function selectPeriod(key) {
+  currentPeriod = key;
+  currentAuthor = null;
+  buildNav();
+  renderReports(key);
+  document.querySelector('.sidebar').classList.remove('open');
+}
+
+function selectAuthor(key, author) {
+  currentPeriod = key;
+  currentAuthor = author;
+  buildNav();
+  renderReports(key, author);
+  document.querySelector('.sidebar').classList.remove('open');
+}
+
+function renderReports(key, authorFilter) {
+  const [year, period] = key.split('/');
+  const isWeekly = period.startsWith('W');
+  const reports = allReports.filter(r => r.year === year && r.period === period);
+
+  if (authorFilter) {
+    const r = reports.find(r => r.author === authorFilter);
+    if (r) renderSingle(r, reports.length);
+    return;
+  }
+
+  const periodLabel = isWeekly ? `${period} 주간 보고서` : `${year}년 ${period.replace('M','')}월 월간 보고서`;
+  const tagClass = isWeekly ? 'weekly' : 'monthly';
+  const tagLabel = isWeekly ? '주간' : '월간';
+
+  let html = `
+    <div class="content-header">
+      <h2><span class="period-tag ${tagClass}">${tagLabel}</span>${periodLabel}</h2>
+      <div class="meta">${reports.length}명 제출 · ${year}</div>
+    </div>
+    <div class="content-body">
+      <div class="overview-stats">
+        <div class="overview-stat">
+          <div class="label">제출 인원</div>
+          <div class="value accent">${reports.length}</div>
+        </div>
+        <div class="overview-stat">
+          <div class="label">유형</div>
+          <div class="value warm">${tagLabel}</div>
+        </div>
+      </div>
+  `;
+
+  reports.forEach(r => {
+    const rendered = marked.parse(r.content);
+    html += `
+      <div class="report-card">
+        <div class="author-name">${r.author}</div>
+        <div class="author-summary">${r.summary || ''}</div>
+        <div class="md-content">${rendered}</div>
+      </div>
+    `;
+  });
+
+  html += '</div>';
+  document.getElementById('content-area').innerHTML = html;
+}
+
+function renderSingle(r, totalCount) {
+  const isWeekly = r.periodType === 'weekly';
+  const tagClass = isWeekly ? 'weekly' : 'monthly';
+  const tagLabel = isWeekly ? '주간' : '월간';
+  const periodLabel = isWeekly ? `${r.period} 주간` : `${r.year}년 ${r.period.replace('M','')}월`;
+
+  const rendered = marked.parse(r.content);
+
+  const html = `
+    <div class="content-header">
+      <h2><span class="period-tag ${tagClass}">${tagLabel}</span>${r.author} — ${periodLabel}</h2>
+      <div class="meta">${r.year}</div>
+    </div>
+    <div class="content-body">
+      <div class="report-card">
+        <div class="md-content">${rendered}</div>
+      </div>
+    </div>
+  `;
+
+  document.getElementById('content-area').innerHTML = html;
+}
+
+init();
+</script>
+</body>
+</html>
