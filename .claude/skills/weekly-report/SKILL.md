@@ -55,7 +55,23 @@ description: 주간/월간 작업 보고서를 Git 커밋 + Claude 세션 기반
 | 일 평균 커밋 | 총 커밋 / 기간 일수 |
 | 하네스 운영 | 활성 Claude 하네스 수 (CLAUDE.md 기반 확인) |
 
-## Phase 4: 비코드 작업 확인
+## Phase 4: Claude 사용량 집계
+
+1. `~/.claude/projects/` 디렉토리에서 해당 기간의 세션 로그 집계:
+   ```bash
+   # 메인 세션 (subagents 제외)
+   find ~/.claude/projects/ -maxdepth 3 -name "*.jsonl" ! -path "*/subagents/*" -newermt "{시작일}" ! -newermt "{종료일}" | wc -l
+   # 서브에이전트 세션
+   find ~/.claude/projects/ -maxdepth 4 -name "*.jsonl" -path "*/subagents/*" -newermt "{시작일}" ! -newermt "{종료일}" | wc -l
+   # 일별 분포
+   find ~/.claude/projects/ -maxdepth 3 -name "*.jsonl" ! -path "*/subagents/*" -newermt "{시작일}" ! -newermt "{종료일}" -printf "%TY-%Tm-%Td\n" | sort | uniq -c
+   # 데이터 크기 (월간만)
+   find ~/.claude/projects/ -maxdepth 3 -name "*.jsonl" ! -path "*/subagents/*" -newermt "{시작일}" ! -newermt "{종료일}" -printf "%s\n" | awk '{s+=$1} END {printf "%.1f MB\n", s/1024/1024}'
+   ```
+2. 보고서에 `Claude 사용량` 섹션으로 포함
+3. 월간은 일별 세션 분포 테이블도 추가
+
+## Phase 5: 비코드 작업 확인
 
 사용자에게 질문:
 - "코드 외 작업이 있었나요? (분석, 미팅, 기획, 하네스 운영 등)"
@@ -63,7 +79,7 @@ description: 주간/월간 작업 보고서를 Git 커밋 + Claude 세션 기반
 - 주간: "다음 주 계획은?"
 - 월간: "다음 달 계획은?"
 
-## Phase 5: 보고서 생성
+## Phase 6: 보고서 생성
 
 1. `RULES.md`의 템플릿에 맞춰 보고서 작성
 2. **활동 통계 섹션**을 반드시 포함

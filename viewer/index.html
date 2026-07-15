@@ -374,7 +374,7 @@ function extractMemberNames(reports) {
 }
 
 function extractStats(reports) {
-  let totalCommits = 0, totalProjects = 0, totalHarnesses = 0;
+  let totalCommits = 0, totalProjects = 0, totalHarnesses = 0, totalSessions = 0;
   reports.forEach(r => {
     const cm = r.content.match(/총\s*커밋[^\d]*?(\d+)/);
     if (cm) totalCommits += parseInt(cm[1]);
@@ -382,8 +382,14 @@ function extractStats(reports) {
     if (pm) totalProjects = Math.max(totalProjects, parseInt(pm[1]));
     const hm = r.content.match(/하네스\s*운영[^\d]*?(\d+)/);
     if (hm) totalHarnesses = Math.max(totalHarnesses, parseInt(hm[1]));
+    const sm = r.content.match(/총\s*세션[^\d]*?(\d+)/);
+    if (sm) totalSessions += parseInt(sm[1]);
+    if (!sm) {
+      const sw = r.content.match(/주간\s*세션[^\d]*?(\d+)/);
+      if (sw) totalSessions += parseInt(sw[1]);
+    }
   });
-  return { totalCommits, totalProjects, totalHarnesses };
+  return { totalCommits, totalProjects, totalHarnesses, totalSessions };
 }
 
 function isoWeekToMonth(year, weekNum) {
@@ -509,6 +515,9 @@ function renderStats() {
   }
   if (stats.totalHarnesses > 0) {
     html += `<div class="stat-item"><span class="stat-value">${stats.totalHarnesses}</span> 하네스</div>`;
+  }
+  if (stats.totalSessions > 0) {
+    html += `<div class="stat-item"><span class="stat-value">${stats.totalSessions}</span> Claude 세션</div>`;
   }
   html += '</div>';
   document.getElementById('stats-area').innerHTML = html;
