@@ -249,6 +249,49 @@
   .cmd-table td { padding: 6px 8px; border: 1px solid var(--border); vertical-align: top; }
   .cmd-table td:first-child { font-family: Consolas, monospace; color: var(--accent); white-space: nowrap; background: var(--bg); }
 
+  /* Lock screen */
+  .lock-screen {
+    position: fixed; inset: 0; z-index: 200;
+    background: var(--sidebar-bg);
+    display: flex; align-items: center; justify-content: center;
+  }
+  .lock-screen.hidden { display: none; }
+  .lock-box {
+    text-align: center; padding: 40px;
+  }
+  .lock-icon {
+    width: 56px; height: 56px; border-radius: 50%;
+    background: rgba(91,155,213,.15);
+    display: flex; align-items: center; justify-content: center;
+    margin: 0 auto 20px; font-size: 24px;
+  }
+  .lock-box h2 { color: #fff; font-size: 18px; font-weight: 700; margin-bottom: 6px; }
+  .lock-box p { color: var(--sidebar-text); font-size: 13px; margin-bottom: 24px; }
+  .lock-input-wrap {
+    display: flex; gap: 8px; justify-content: center;
+  }
+  .lock-input {
+    width: 200px; padding: 10px 14px;
+    background: rgba(255,255,255,.08); border: 1px solid rgba(255,255,255,.15);
+    border-radius: 8px; color: #fff; font-size: 15px;
+    font-family: inherit; text-align: center; letter-spacing: .15em;
+    outline: none; transition: border-color .15s;
+  }
+  .lock-input:focus { border-color: var(--sidebar-accent); }
+  .lock-input::placeholder { color: rgba(255,255,255,.25); letter-spacing: normal; }
+  .lock-btn {
+    padding: 10px 20px; border-radius: 8px; border: none;
+    background: var(--sidebar-accent); color: #fff;
+    font-size: 14px; font-weight: 600; cursor: pointer;
+    font-family: inherit; transition: opacity .12s;
+  }
+  .lock-btn:hover { opacity: .85; }
+  .lock-error {
+    color: #F87171; font-size: 12px; margin-top: 10px;
+    visibility: hidden;
+  }
+  .lock-error.show { visibility: visible; }
+
   /* Mobile */
   .mobile-toggle {
     display: none; position: fixed; top: 12px; left: 12px; z-index: 20;
@@ -267,6 +310,21 @@
 </style>
 </head>
 <body>
+
+<!-- Lock Screen -->
+<div class="lock-screen" id="lock-screen">
+  <div class="lock-box">
+    <div class="lock-icon">&#128274;</div>
+    <h2>작업 보고서 뷰어</h2>
+    <p>접근 코드를 입력하세요</p>
+    <div class="lock-input-wrap">
+      <input class="lock-input" id="lock-input" type="password" placeholder="Access Code" maxlength="10"
+        onkeydown="if(event.key==='Enter')checkPassword()">
+      <button class="lock-btn" onclick="checkPassword()">확인</button>
+    </div>
+    <div class="lock-error" id="lock-error">접근 코드가 올바르지 않습니다</div>
+  </div>
+</div>
 
 <button class="mobile-toggle" onclick="document.querySelector('.sidebar').classList.toggle('open')">&#9776;</button>
 
@@ -351,6 +409,31 @@ git push</pre></li>
 </div>
 
 <script>
+const PW_HASH = '6715cbe90b9d832898df9c30e18b50d92b08e0299dd538c0ba43a0e5f200150a';
+
+async function sha256(text) {
+  const data = new TextEncoder().encode(text);
+  const buf = await crypto.subtle.digest('SHA-256', data);
+  return Array.from(new Uint8Array(buf)).map(b => b.toString(16).padStart(2, '0')).join('');
+}
+
+async function checkPassword() {
+  const input = document.getElementById('lock-input').value;
+  const hash = await sha256(input);
+  if (hash === PW_HASH) {
+    sessionStorage.setItem('viewer_auth', '1');
+    document.getElementById('lock-screen').classList.add('hidden');
+  } else {
+    document.getElementById('lock-error').classList.add('show');
+    document.getElementById('lock-input').value = '';
+    document.getElementById('lock-input').focus();
+  }
+}
+
+if (sessionStorage.getItem('viewer_auth') === '1') {
+  document.getElementById('lock-screen').classList.add('hidden');
+}
+
 const AVATAR_COLORS = ['#5B9BD5','#D4793A','#2D8F5E','#8B5CF6','#EC4899','#0EA5E9','#F59E0B','#6366F1'];
 const MEMBER_NAMES = {};
 
