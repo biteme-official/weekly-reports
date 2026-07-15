@@ -1,5 +1,5 @@
 ---
-name: weekly-report
+name: claude-report-v1
 description: 주간/월간 작업 보고서를 Git 커밋 + Claude 세션 기반으로 자동 생성. "6월 보고서", "W28 보고서", "한달 보고서" 등으로 호출 가능.
 ---
 
@@ -7,10 +7,10 @@ description: 주간/월간 작업 보고서를 Git 커밋 + Claude 세션 기반
 
 주간 또는 월간 보고서를 자동 생성한다. 호출 시 인자로 기간을 받을 수 있다.
 
-- `/weekly-report` → 지난 주 주간 보고서
-- `/weekly-report 6월` 또는 `/weekly-report M06` → 6월 월간 보고서
-- `/weekly-report W25` → W25 주간 보고서
-- `/weekly-report 3개월` → 최근 3개월 월간 보고서
+- `/claude-report-v1` → 지난 주 주간 보고서
+- `/claude-report-v1 6월` 또는 `/claude-report-v1 M06` → 6월 월간 보고서
+- `/claude-report-v1 W25` → W25 주간 보고서
+- `/claude-report-v1 3개월` → 최근 3개월 월간 보고서
 
 ## Phase 1: 기간 및 모드 결정
 

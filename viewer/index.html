@@ -94,20 +94,6 @@
   .filter-bar .person-label { font-size: 15px; font-weight: 700; margin-right: 4px; }
   .filter-bar .sep { width: 1px; height: 20px; background: var(--border); margin: 0 4px; }
 
-  /* Type tabs */
-  .type-tabs {
-    display: flex; gap: 2px;
-    background: var(--bg); border-radius: 7px; padding: 2px;
-  }
-  .type-tab {
-    padding: 5px 14px; border-radius: 5px; border: none;
-    font-size: 12px; font-weight: 600; cursor: pointer;
-    background: transparent; color: var(--text-muted);
-    font-family: inherit; transition: all .12s;
-  }
-  .type-tab.active { background: var(--surface); color: var(--text); box-shadow: 0 1px 3px rgba(0,0,0,.08); }
-  .type-tab:hover:not(.active) { color: var(--text-secondary); }
-
   /* Dropdown */
   .dropdown { position: relative; display: inline-block; }
   .dropdown select {
@@ -348,15 +334,9 @@
   <div class="filter-bar" id="filter-bar" style="display:none">
     <span class="person-label" id="filter-person"></span>
     <span class="sep"></span>
-    <div class="type-tabs" id="type-tabs">
-      <button class="type-tab active" onclick="setType('all')">전체</button>
-      <button class="type-tab" onclick="setType('weekly')">주간</button>
-      <button class="type-tab" onclick="setType('monthly')">월간</button>
-    </div>
-    <span class="sep"></span>
     <span class="dropdown">
-      <label>기간</label>
-      <select id="period-select" onchange="renderContent()"></select>
+      <label>월</label>
+      <select id="month-select" onchange="renderContent()"></select>
     </span>
   </div>
   <div id="stats-area"></div>
@@ -439,7 +419,6 @@ const MEMBER_NAMES = {};
 
 let allReports = [];
 let selectedAuthor = null;
-let selectedType = 'all';
 
 function extractMemberNames(reports) {
   reports.forEach(r => {
@@ -533,7 +512,6 @@ function buildMemberList() {
 
 function selectAuthor(authorId) {
   selectedAuthor = authorId;
-  selectedType = 'all';
   buildMemberList();
   document.querySelector('.sidebar').classList.remove('open');
 
@@ -541,47 +519,33 @@ function selectAuthor(authorId) {
   document.getElementById('filter-person').textContent = displayName;
   document.getElementById('filter-bar').style.display = 'flex';
 
-  document.querySelectorAll('.type-tab').forEach((t, i) => {
-    t.classList.toggle('active', i === 0);
-  });
-
-  populatePeriodDropdown();
+  populateMonthDropdown();
   renderStats();
 }
 
-function setType(type) {
-  selectedType = type;
-  document.querySelectorAll('.type-tab').forEach(t => {
-    t.classList.toggle('active', t.textContent === (type === 'all' ? '전체' : type === 'weekly' ? '주간' : '월간'));
+function populateMonthDropdown() {
+  const reports = allReports.filter(r => r.author === selectedAuthor);
+  const monthSet = new Map();
+  reports.forEach(r => {
+    const key = `${r.year}-${String(r.month).padStart(2,'0')}`;
+    if (!monthSet.has(key)) {
+      monthSet.set(key, { year: r.year, month: r.month, label: `${r.year}년 ${r.month}월` });
+    }
   });
-  populatePeriodDropdown();
-  renderStats();
-}
+  const months = [...monthSet.values()].sort((a, b) =>
+    `${b.year}-${String(b.month).padStart(2,'0')}`.localeCompare(`${a.year}-${String(a.month).padStart(2,'0')}`)
+  );
 
-function populatePeriodDropdown() {
-  let reports = allReports.filter(r => r.author === selectedAuthor);
-  if (selectedType !== 'all') {
-    reports = reports.filter(r => r.periodType === selectedType);
-  }
-
-  const periods = reports.map(r => ({
-    key: r.period,
-    label: r.periodType === 'weekly' ? `${r.period} (${r.year})` : `${r.year}년 ${parseInt(r.periodNum)}월`,
-    type: r.periodType,
-    sort: r.year + r.period,
-  }));
-  periods.sort((a, b) => b.sort.localeCompare(a.sort));
-  const unique = [...new Map(periods.map(p => [p.key, p])).values()];
-
-  const sel = document.getElementById('period-select');
-  sel.innerHTML = '<option value="all">전체</option>' +
-    unique.map(p => `<option value="${p.key}">${p.label}</option>`).join('');
+  const sel = document.getElementById('month-select');
+  sel.innerHTML = months.map((m, i) =>
+    `<option value="${m.year}-${String(m.month).padStart(2,'0')}"${i===0?' selected':''}>${m.label}</option>`
+  ).join('');
 
   renderContent();
 }
 
 function renderStats() {
-  let reports = allReports.filter(r => r.author === selectedAuthor);
+  const reports = allReports.filter(r => r.author === selectedAuthor);
   const weeklyCount = reports.filter(r => r.periodType === 'weekly').length;
   const monthlyCount = reports.filter(r => r.periodType === 'monthly').length;
   const stats = extractStats(reports);
@@ -607,44 +571,50 @@ function renderStats() {
 }
 
 function renderContent() {
-  const periodVal = document.getElementById('period-select').value;
-  let reports = allReports.filter(r => r.author === selectedAuthor);
+  const sel = document.getElementById('month-select');
+  if (!sel.value) return;
+  const [selYear, selMonth] = sel.value.split('-').map(Number);
 
-  if (selectedType !== 'all') {
-    reports = reports.filter(r => r.periodType === selectedType);
-  }
-  if (periodVal !== 'all') {
-    reports = reports.filter(r => r.period === periodVal);
-  }
+  const reports = allReports.filter(r =>
+    r.author === selectedAuthor && parseInt(r.year) === selYear && r.month === selMonth
+  );
 
-  reports.sort((a, b) => (b.year + b.period).localeCompare(a.year + a.period));
+  const monthly = reports.filter(r => r.periodType === 'monthly');
+  const weekly = reports.filter(r => r.periodType === 'weekly')
+    .sort((a, b) => b.period.localeCompare(a.period));
 
   if (reports.length === 0) {
     document.getElementById('content-area').innerHTML = `
       <div class="empty-state">
         <div class="icon">&#128196;</div>
         <h3>보고서가 없습니다</h3>
-        <p>선택한 조건에 해당하는 보고서가 없습니다</p>
+        <p>${selYear}년 ${selMonth}월 보고서가 없습니다</p>
       </div>`;
     return;
   }
 
   let html = '<div class="content-body">';
-  reports.forEach(r => {
-    const rendered = marked.parse(r.content);
-    const isWeekly = r.periodType === 'weekly';
-    const badgeClass = isWeekly ? 'weekly' : 'monthly';
-    const badgeLabel = isWeekly ? '주간' : '월간';
-    const periodLabel = isWeekly ? `${r.period} (${r.year})` : `${r.year}년 ${parseInt(r.periodNum)}월`;
 
+  monthly.forEach(r => {
     html += `<div class="report-card">
       <div class="report-meta">
-        <span class="period-badge ${badgeClass}">${badgeLabel}</span>
-        <span class="report-period">${periodLabel}</span>
+        <span class="period-badge monthly">월간</span>
+        <span class="report-period">${r.year}년 ${parseInt(r.periodNum)}월</span>
       </div>
-      <div class="md-content">${rendered}</div>
+      <div class="md-content">${marked.parse(r.content)}</div>
     </div>`;
   });
+
+  weekly.forEach(r => {
+    html += `<div class="report-card">
+      <div class="report-meta">
+        <span class="period-badge weekly">주간</span>
+        <span class="report-period">${r.period} (${r.year})</span>
+      </div>
+      <div class="md-content">${marked.parse(r.content)}</div>
+    </div>`;
+  });
+
   html += '</div>';
   document.getElementById('content-area').innerHTML = html;
 }

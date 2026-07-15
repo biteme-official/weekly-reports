@@ -1,0 +1,182 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>주간 보고서 프로세스 가이드</title>
+</head>
+<body>
+<style>
+  :root {
+    --navy: #1C1F26;
+    --blue: #5B9BD5;
+    --blue-light: #EBF3FA;
+    --orange: #D4793A;
+    --orange-light: #FDF0E6;
+    --green: #2D8F5E;
+    --green-light: #E8F5EE;
+    --surface: #F7F7F5;
+    --white: #FFFFFF;
+    --text: #1A1C21;
+    --text-sub: #5A5D66;
+    --text-muted: #8B8E97;
+    --border: #E2E3E7;
+  }
+  @media (prefers-color-scheme: dark) {
+    :root {
+      --navy: #0F1117; --surface: #1A1D25; --white: #22252E;
+      --text: #E4E5E9; --text-sub: #A0A3AC; --text-muted: #6B6E77;
+      --border: #2E3140; --blue-light: #1E2A3A; --orange-light: #2A2118; --green-light: #1A2A20;
+    }
+  }
+  :root[data-theme="dark"] {
+    --navy: #0F1117; --surface: #1A1D25; --white: #22252E;
+    --text: #E4E5E9; --text-sub: #A0A3AC; --text-muted: #6B6E77;
+    --border: #2E3140; --blue-light: #1E2A3A; --orange-light: #2A2118; --green-light: #1A2A20;
+  }
+  :root[data-theme="light"] {
+    --navy: #1C1F26; --blue-light: #EBF3FA; --orange-light: #FDF0E6; --green-light: #E8F5EE;
+    --surface: #F7F7F5; --white: #FFFFFF; --text: #1A1C21; --text-sub: #5A5D66;
+    --text-muted: #8B8E97; --border: #E2E3E7;
+  }
+
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  body {
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", "Apple SD Gothic Neo", "Malgun Gothic", sans-serif;
+    background: var(--surface); color: var(--text);
+    -webkit-font-smoothing: antialiased;
+  }
+  .page { max-width: 560px; margin: 0 auto; padding: 48px 24px 64px; }
+
+  /* Header */
+  .header { text-align: center; margin-bottom: 40px; }
+  .header-badge {
+    display: inline-block;
+    background: var(--blue-light); color: var(--blue);
+    font-size: 11px; font-weight: 700; letter-spacing: .06em;
+    padding: 4px 12px; border-radius: 20px; margin-bottom: 14px;
+  }
+  .header h1 { font-size: 26px; font-weight: 800; line-height: 1.3; margin-bottom: 6px; }
+  .header p { font-size: 14px; color: var(--text-sub); }
+
+  /* Schedule cards */
+  .schedule { display: flex; gap: 12px; margin-bottom: 36px; }
+  .sched-card {
+    flex: 1; background: var(--white); border: 1px solid var(--border);
+    border-radius: 12px; padding: 18px; text-align: center;
+  }
+  .sched-icon { font-size: 28px; margin-bottom: 8px; }
+  .sched-when { font-size: 13px; font-weight: 700; margin-bottom: 2px; }
+  .sched-what { font-size: 12px; color: var(--text-muted); }
+
+  /* Command section */
+  .cmd-section {
+    background: var(--white); border: 1px solid var(--border);
+    border-radius: 14px; padding: 24px; margin-bottom: 16px;
+  }
+  .cmd-section h2 {
+    font-size: 15px; font-weight: 700; margin-bottom: 4px;
+    display: flex; align-items: center; gap: 8px;
+  }
+  .cmd-num {
+    width: 24px; height: 24px; border-radius: 50%;
+    background: var(--blue); color: #fff;
+    font-size: 12px; font-weight: 800;
+    display: inline-flex; align-items: center; justify-content: center;
+    flex-shrink: 0;
+  }
+  .cmd-num.setup { background: var(--text-muted); }
+  .cmd-desc { font-size: 13px; color: var(--text-sub); margin: 4px 0 12px 32px; }
+  .cmd-code {
+    background: var(--navy); color: #E4E5E9;
+    font-family: "Cascadia Code", Consolas, "Courier New", monospace;
+    font-size: 14px; font-weight: 600; line-height: 1.8;
+    padding: 14px 18px; border-radius: 8px;
+    margin-left: 32px;
+  }
+  .cmd-code .dim { color: #6B7280; font-weight: 400; }
+  .cmd-code .hl { color: #FCD34D; }
+
+  /* Divider */
+  .divider {
+    display: flex; align-items: center; gap: 12px;
+    margin: 24px 0; color: var(--text-muted); font-size: 11px; font-weight: 600;
+    letter-spacing: .05em;
+  }
+  .divider::before, .divider::after {
+    content: ""; flex: 1; height: 1px; background: var(--border);
+  }
+
+  /* Note */
+  .note {
+    background: var(--orange-light); border-left: 3px solid var(--orange);
+    border-radius: 0 10px 10px 0; padding: 14px 18px;
+    font-size: 13px; color: var(--text-sub); line-height: 1.7;
+    margin-top: 24px;
+  }
+  .note strong { color: var(--orange); }
+
+  .footer {
+    margin-top: 32px; text-align: center;
+    font-size: 11px; color: var(--text-muted);
+  }
+</style>
+
+<div class="page">
+  <div class="header">
+    <div class="header-badge">BITEME WEEKLY REPORT</div>
+    <h1>주간/월간 보고서</h1>
+    <p>명령어 하나로 자동 생성</p>
+  </div>
+
+  <div class="schedule">
+    <div class="sched-card">
+      <div class="sched-icon">📅</div>
+      <div class="sched-when">매주 월요일</div>
+      <div class="sched-what">주간 보고서</div>
+    </div>
+    <div class="sched-card">
+      <div class="sched-icon">📊</div>
+      <div class="sched-when">매월 1일</div>
+      <div class="sched-what">월간 보고서</div>
+    </div>
+  </div>
+
+  <div class="divider">최초 1회</div>
+
+  <div class="cmd-section">
+    <h2><span class="cmd-num setup">0</span> 레포 클론</h2>
+    <div class="cmd-code">
+      git clone https://github.com/biteme-official/weekly-reports.git
+    </div>
+  </div>
+
+  <div class="divider">매주 / 매월</div>
+
+  <div class="cmd-section">
+    <h2><span class="cmd-num">1</span> 주간 보고서</h2>
+    <div class="cmd-desc">weekly-reports 폴더에서 실행</div>
+    <div class="cmd-code">
+      <span class="hl">report</span>
+    </div>
+  </div>
+
+  <div class="cmd-section">
+    <h2><span class="cmd-num">2</span> 월간 보고서</h2>
+    <div class="cmd-desc">월 이름을 뒤에 붙이면 됩니다</div>
+    <div class="cmd-code">
+      <span class="hl">report-monthly</span> 6월
+    </div>
+  </div>
+
+  <div class="note">
+    <strong>참고</strong><br>
+    Git 커밋 기반으로 자동 수집됩니다.<br>
+    비코드 작업(미팅, 기획 등)은 생성 중에 물어봅니다.<br>
+    확인 후 자동으로 커밋 &amp; 푸시됩니다.
+  </div>
+
+  <div class="footer">바잇미 전략기획팀</div>
+</div>
+</body>
+</html>
